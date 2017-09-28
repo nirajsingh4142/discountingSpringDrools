@@ -34,108 +34,87 @@ import com.technorage.demo.facts.Product;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
-import com.technorage.demo.facts.Terms;
 import com.technorage.demo.forms.DemoForm;
 
 @Service
 @Scope(value=ConfigurableBeanFactory.SCOPE_SINGLETON, proxyMode=ScopedProxyMode.INTERFACES)
 public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable {
 
-    /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4279066046268640811L;
 
 	private static Logger log = LoggerFactory.getLogger(DemoRuleServiceImpl.class);
-            
-    public KieSessionBean kieSession;
-    
-    private TrackingAgendaEventListener agendaEventListener;
-    private TrackingWorkingMemoryEventListener workingMemoryEventListener;
 
-    private Map<String,Room> name2room = new HashMap<String,Room>();
-    private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
-    
-    private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
-    private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
-    
-    @Autowired
-    public DemoRuleServiceImpl(
-            @Qualifier("demoKieContainer") KieContainerBean kieContainer,@Qualifier("demoKieServices") KieServicesBean kieServices) {
-        
-        kieSession = new DefaultKieSessionBean(kieServices, kieContainer);
-        
-        agendaEventListener = new TrackingAgendaEventListener();
-        workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
+	public KieSessionBean kieSession;
 
-        kieSession.addEventListener(agendaEventListener);
-        kieSession.addEventListener(workingMemoryEventListener);
+	private TrackingAgendaEventListener agendaEventListener;
+	private TrackingWorkingMemoryEventListener workingMemoryEventListener;
 
-    }
-    
-    @Override
-    public Collection<Alarm> addFire(String[]  fires) {
-    	
-    	for( String fire: fires ){
-    		
-    		if(!fact2fire.containsKey(fire)){
-	    		Fire roomFire = new Fire( name2room.get(fire) );
-	    		FactHandle roomFireHandle = kieSession.insert( roomFire );
-	    		fact2fire.put( fire, roomFireHandle );
-    		}
-    		
-    	}
-			
+	private Map<String,Room> name2room = new HashMap<String,Room>();
+	private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
+
+	private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
+	private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
+	private FactFinder<RuleSetup> findRuleSetups = new FactFinder<>(RuleSetup.class);
+
+	@Autowired
+	public DemoRuleServiceImpl(
+			@Qualifier("demoKieContainer") KieContainerBean kieContainer,@Qualifier("demoKieServices") KieServicesBean kieServices) {
+
+		kieSession = new DefaultKieSessionBean(kieServices, kieContainer);
+
+		agendaEventListener = new TrackingAgendaEventListener();
+		workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
+
+		kieSession.addEventListener(agendaEventListener);
+		kieSession.addEventListener(workingMemoryEventListener);
+
+	}
+
+	@Override
+	public Collection<Alarm> addFire(String[]  fires) {
+
+		for( String fire: fires ){
+
+			if(!fact2fire.containsKey(fire)){
+				Fire roomFire = new Fire( name2room.get(fire) );
+				FactHandle roomFireHandle = kieSession.insert( roomFire );
+				fact2fire.put( fire, roomFireHandle );
+			}
+
+		}
+
 		kieSession.fireAllRules();
-        //  Collection<T> result = findFact.findFacts(kieSession, new BeanPropertyFilter("key", ""));     
-		
+		//  Collection<T> result = findFact.findFacts(kieSession, new BeanPropertyFilter("key", ""));     
+
 		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-		
+
 		return result;
-    }
+	}
 
 	@Override
 	public Collection<Alarm> remFire(String[]  fires) {
-		
+
 		for( String fire: fires ){
 			if(fact2fire.containsKey(fire)){
 				kieSession.delete( fact2fire.get(fire) );
 				fact2fire.remove( fire );
 			}
 		}
-		
+
 
 		kieSession.fireAllRules();
-		
+
 		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-		
+
 		return result;
 	}
 
-	/*@Override
-	public void addRooms(String[] names) {
-		
-		for( String name: names ){
-
-            Room room = new Room( name );
-
-            name2room.put( name, room );
-
-            kieSession.insert( room );
-
-            Sprinkler sprinkler = new Sprinkler( room );
-
-            kieSession.insert( sprinkler );
-
-        }
-		
-        kieSession.fireAllRules();
-        
-		
-	}*/
 	@Override
 	public void addRoom(DemoForm demoForm) {
-		
+
 		RuleSetup ruleSetup = new RuleSetup();
 		ruleSetup.setRuleNumber(demoForm.getRuleNumber());
 		ruleSetup.setRuleName(demoForm.getRuleName());
@@ -149,61 +128,62 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		product.setIsbn(demoForm.getIsbn());
 		product.setProductGroupCode(demoForm.getDgp());
 		ruleSetup.setProduct(product);
-		
+
 		Discount discount = new Discount();
 		discount.setPercentage(demoForm.getDiscount());
 		ruleSetup.setDiscount(discount);
-		
+
 		Offer offer =new Offer();
 		offer.setComboField(demoForm.getCombo());
 		offer.setHardcode(demoForm.isHardcode());
 		offer.setPriority(demoForm.getPriority());
 		offer.setOverridenExplicitly(demoForm.isOverridenExplicitly());
-		
+
 		offer.setDays(demoForm.getTerms());
 		offer.setFrieghtCharge(demoForm.getFrieghtCharge());
-		
-		
 
-        //name2room.put( name, room );
+		ruleSetup.setOffer(offer);
 
-        kieSession.insert( ruleSetup );
 
-        Sprinkler sprinkler = new Sprinkler( ruleSetup );
+		//name2room.put( name, room );
 
-        kieSession.insert( sprinkler );
+		kieSession.insert( ruleSetup );
 
-		
-        //kieSession.fireAllRules();
-        
-		
+		Sprinkler sprinkler = new Sprinkler( ruleSetup );
+
+		kieSession.insert( sprinkler );
+
+
+		//kieSession.fireAllRules();
+
+
 	}
 
 	@Override
 	public Collection<Alarm> checkForFire() {
-		
+
 		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public Collection<Sprinkler> checkSprinklers() {
-		
+
 		Collection<Sprinkler> result = findSprinklers.findFacts(kieSession);
-		
+
 		return result;
 	}
 
 	@Override
 	public Room getRoom(String name) {
-		
+
 		return name2room.get(name);
 	}
 
 	@Override
 	public void addOrder(DemoForm demoForm) {
-		
+
 		OrderLine orderLine = new OrderLine();
 		orderLine.setOrderLineId(demoForm.getOrderLineNumber());
 		Account account = new Account();
@@ -216,18 +196,34 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		product.setIsbn(demoForm.getIsbn());
 		product.setProductGroupCode(demoForm.getDgp());
 		orderLine.setProduct(product);
-		
-        kieSession.insert( orderLine );
 
-        Sprinkler sprinkler = new Sprinkler( orderLine );
+		kieSession.insert( orderLine );
+		Sprinkler sprinkler = new Sprinkler( orderLine );
+		kieSession.insert( sprinkler );
 
-        kieSession.insert( sprinkler );
-
-		
-        //kieSession.fireAllRules();
-        
-		
 	}
 
-    
+	@Override
+	public Collection<RuleSetup> generateOffer(DemoForm demoForm) {
+		System.out.println("Bootstrapping the Rule Engine ..." );
+		kieSession.fireAllRules();
+		System.out.println("Rules fired");
+		
+		Collection<RuleSetup> result = findRuleSetups.findFacts(kieSession);
+		
+		List<RuleSetup> finalRule = new ArrayList<RuleSetup>();
+		
+		for(RuleSetup rule : result) {
+			if(rule.getIsQualified()) {
+				finalRule.add(rule);
+				System.out.println("Rules qualified: " + rule.getRuleName());
+			}
+		}
+		
+		System.out.println("Bootstrapping the Rule Engine ..." );
+		
+		return finalRule;
+	}
+
+
 }

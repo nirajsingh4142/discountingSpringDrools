@@ -13,11 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.technorage.demo.facts.Alarm;
+import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.forms.DemoForm;
+import com.technorage.demo.forms.RuleSetupForm;
 import com.technorage.demo.services.DemoRuleService;
 import com.technorage.demo.utils.DateUtils;
-import com.technorage.demo.forms.RuleSetupForm;
 
 @Controller
 public class HomeControllerImpl implements HomeController {
@@ -38,21 +39,39 @@ public class HomeControllerImpl implements HomeController {
 	@Override
 	public String addRoom(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Adding room: " + demoForm.getRoomName());
-			ruleService.addRoom(demoForm);
-			rooms.put(demoForm.getRoomName(), demoForm.getRoomName());
-		
+		ruleService.addRoom(demoForm);
+		rooms.put(demoForm.getRoomName(), demoForm.getRoomName());
+
 		return getIndex(locale, model);
 	}
-	
+
 	@Override
 	public String addOrder(DemoForm demoForm, Locale locale, Model model) {
-		logger.info("Adding Order: " + demoForm.getOrderLineNumber());
-			ruleService.addOrder(demoForm);
-			//rooms.put(demoForm.getOrderLineNumber().toString(), demoForm.getOrderLineNumber().toString());
-		
+		logger.info("Adding Order line: " + demoForm.getOrderLineNumber());
+		ruleService.addOrder(demoForm);
+
 		return getIndex(locale, model);
 	}
-	
+
+	@Override
+	public String generateOffer(DemoForm demoForm, Locale locale, Model model) {
+		logger.info("Generating Offer for order line: : " + demoForm.getOrderLineNumber());
+		
+		Collection<RuleSetup> ruleSetupList = ruleService.generateOffer(null);
+		String winner = " ";
+		for(RuleSetup ruleSetup : ruleSetupList) {
+			winner = winner + ", " + ruleSetup.getRuleName();
+		}
+		
+		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
+		model.addAttribute("sprinklers", sprinklers);
+		
+		model.addAttribute("noOfAlarms", winner.substring(2));
+		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
+		
+		return ("index");
+	}
+
 	@Override
 	public String addFire(DemoForm demoForm,Locale locale, Model model) {
 		if(demoForm.getFireRoomName()!=null && !demoForm.getFireRoomName().isEmpty()){
@@ -73,21 +92,17 @@ public class HomeControllerImpl implements HomeController {
 	}
 
 	private String getIndex(Locale locale, Model model){
-
 		logger.info("Welcome to rules demo! The client locale is {}.", locale);
 
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
-
 		Collection<Alarm> alarms=ruleService.checkForFire();
-
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
-
+		
 		model.addAttribute("alarmsFound", alarms!=null && alarms.size()!=0? true:false );
-
 		model.addAttribute("noOfAlarms", alarms.size());
-
 		model.addAttribute("alarms", alarms);
 		model.addAttribute("sprinklers", sprinklers);
+		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		model.addAttribute("rooms", rooms);
 		model.addAttribute("demoForm", new DemoForm());
 

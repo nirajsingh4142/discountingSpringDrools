@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.technorage.demo.facts.Alarm;
 import com.technorage.demo.facts.Room;
+import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.forms.DemoForm;
 
@@ -21,6 +22,8 @@ public interface DemoRuleService<T> {
 	Room getRoom(String name);
 
 	void addRoom(DemoForm demoForm);
+	
+	Collection<RuleSetup> generateOffer(DemoForm demoForm);
 	
 	void addOrder(DemoForm demoForm);
 

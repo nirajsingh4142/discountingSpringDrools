@@ -22,6 +22,9 @@ public interface HomeController {
     @RequestMapping(value="/addOrder", method=RequestMethod.POST)
     public String addOrder(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
     
+    @RequestMapping(value="/generateOffer", method=RequestMethod.POST)
+    public String generateOffer(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
+    
     @RequestMapping(value="/addfire", method=RequestMethod.POST)
     public String addFire(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
     
