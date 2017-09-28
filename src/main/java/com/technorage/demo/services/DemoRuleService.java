@@ -21,6 +21,8 @@ public interface DemoRuleService<T> {
 	Room getRoom(String name);
 
 	void addRoom(DemoForm demoForm);
+	
+	void addOrder(DemoForm demoForm);
 
 	Collection<Sprinkler> checkSprinklers();
     

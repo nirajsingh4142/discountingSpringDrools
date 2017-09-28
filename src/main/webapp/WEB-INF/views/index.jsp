@@ -75,6 +75,8 @@
 		<h3>
 			<span class="label label-default">The time on the server is ${serverTime}.</span>
 		</h3>
+		
+		<!-- RULE SETUP SECTION-->
 		<div class="page-header">
 			<h1>Add Rules</h1>
 		</div>
@@ -107,7 +109,37 @@
 				<a class="btn btn-info col-md-12" href="./">Refresh Status</a>
 			</div>
 		</div>
+		
+		<!-- ORDER SETUP SECTION-->
+		<div class="page-header">
+			<h1>Add Order Lines</h1>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<form:form method="POST" action="addOrder" commandName="demoForm">
+					<div class="input-group">
+						<form:input path="orderLineNumber" id="orderLineNumber-input" placeholder="Type order line number" class="form-control" />
+						<form:input path="quantity" id="quantity-input" placeholder="Type quantity" class="form-control" />
+						<form:input path="accountNumber" id="accountNumber-input" placeholder="Type account" class="form-control" />
+						<form:input path="fc" id="fc-input" type="text" placeholder="Type FC" class="form-control" />
+						<form:input path="dgp" id="dgp-input" type="text" placeholder="Type DGP" class="form-control" />
+						<form:input path="accountType" id="accountType-input" type="text" placeholder="Type account type" class="form-control" />
+						<form:input path="isbn" id="isbn-input" placeholder="Type isbn" class="form-control" />
+						<form:input path="discount" id="discount-input" placeholder="Type discount" class="form-control" />
+						<form:input path="listPrice" id="listPrice-input" placeholder="Type list price" class="form-control" />
+						
+						<span class="input-group-btn"> <input class="btn btn-success" type="submit" value="Add Order" />
+						</span>
+					</div>
+				</form:form>
+			</div>
+			
+			<div class="col-md-12">
+				<a class="btn btn-info col-md-12" href="./">Refresh Status</a>
+			</div>
+		</div> 
 
+		<!-- Added Rules are displayed below -->>
 		<ul class="nav nav-tabs" role="tablist">
 			<li class="active"><a href="#room" role="tab" data-toggle="tab">Rule Set</a></li>
 		</ul>
@@ -133,13 +165,10 @@
 									<th>Combo</th>
 									<th>Overriden Explicitly</th>
 									<th>Hardcode</th>
-									
 								</tr>
 							</thead>
 							<tbody>
-
 								<c:forEach var="sprinkler" varStatus="item" items="${sprinklers}">
-
 									<tr>
 										<td>${item.index + 1}</td>
 										<td>${sprinkler.ruleSetup.ruleNumber}</td>
@@ -163,17 +192,16 @@
 													<span class="label label-default">Off</span>
 												</c:otherwise>
 											</c:choose></td>
-											
 									</tr>
 								</c:forEach>
-
-
-
 							</tbody>
 						</table>
 					</div>
 				</div>
 			</div>
+			
+			
+			
 			<div class="tab-pane" id="alarm">
 				<div class="row">
 					<div class="col-md-12">

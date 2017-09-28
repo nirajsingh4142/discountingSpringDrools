@@ -43,6 +43,16 @@ public class HomeControllerImpl implements HomeController {
 		
 		return getIndex(locale, model);
 	}
+	
+	@Override
+	public String addOrder(DemoForm demoForm, Locale locale, Model model) {
+		logger.info("Adding Order: " + demoForm.getOrderLineNumber());
+			ruleService.addOrder(demoForm);
+			rooms.put(demoForm.getOrderLineNumber().toString(), demoForm.getOrderLineNumber().toString());
+		
+		return getIndex(locale, model);
+	}
+	
 	@Override
 	public String addFire(DemoForm demoForm,Locale locale, Model model) {
 		if(demoForm.getFireRoomName()!=null && !demoForm.getFireRoomName().isEmpty()){

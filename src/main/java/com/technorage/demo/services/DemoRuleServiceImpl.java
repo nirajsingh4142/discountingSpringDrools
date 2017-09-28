@@ -29,6 +29,7 @@ import com.technorage.demo.facts.Alarm;
 import com.technorage.demo.facts.Discount;
 import com.technorage.demo.facts.Fire;
 import com.technorage.demo.facts.Offer;
+import com.technorage.demo.facts.OrderLine;
 import com.technorage.demo.facts.Product;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RuleSetup;
@@ -198,6 +199,38 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	public Room getRoom(String name) {
 		
 		return name2room.get(name);
+	}
+
+	@Override
+	public void addOrder(DemoForm demoForm) {
+		
+		OrderLine orderLine = new OrderLine();
+	
+		Account account = new Account();
+		account.setAccountNumber(demoForm.getAccountNumber());
+		account.setAccountType(demoForm.getAccountType());
+		orderLine.setAccount(account);
+
+		Product product = new Product();
+		product.setFamilyCode(demoForm.getFc());
+		product.setIsbn(demoForm.getIsbn());
+		product.setProductGroupCode(demoForm.getDgp());
+		orderLine.setProduct(product);
+		
+		Discount discount = new Discount();
+		discount.setPercentage(demoForm.getDiscount());
+		orderLine.setDiscount(discount);
+		
+        kieSession.insert( orderLine );
+
+        Sprinkler sprinkler = new Sprinkler( orderLine );
+
+        kieSession.insert( sprinkler );
+
+		
+        //kieSession.fireAllRules();
+        
+		
 	}
 
     

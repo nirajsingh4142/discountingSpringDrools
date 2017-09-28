@@ -5,6 +5,7 @@ public class DemoForm {
     private String roomName;
     private String fireRoomName;
     
+    //Rule Setup
     private Integer ruleNumber;
 	private String ruleName;
 	private Integer accountNumber;
@@ -19,6 +20,10 @@ public class DemoForm {
 	private Integer combo;
 	private Integer isbn;
     
+	//Order
+	private Integer orderLineNumber;
+	private Integer quantity;
+    private Integer listPrice;
     
     public String getRoomName() {
 		return roomName;
@@ -109,6 +114,24 @@ public class DemoForm {
 	}
 	public void setIsbn(Integer isbn) {
 		this.isbn = isbn;
+	}
+	public Integer getOrderLineNumber() {
+		return orderLineNumber;
+	}
+	public void setOrderLineNumber(Integer orderLineNumber) {
+		this.orderLineNumber = orderLineNumber;
+	}
+	public Integer getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+	public Integer getListPrice() {
+		return listPrice;
+	}
+	public void setListPrice(Integer listPrice) {
+		this.listPrice = listPrice;
 	}
 	
 }
