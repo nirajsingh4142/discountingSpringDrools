@@ -160,12 +160,10 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		offer.setPriority(demoForm.getPriority());
 		offer.setOverridenExplicitly(demoForm.isOverridenExplicitly());
 		
-		List<Terms> terms = new ArrayList<Terms>();
-		Terms newTerms = new Terms();
-		newTerms.setDays(demoForm.getTerms());
-		terms.add(newTerms);
+		offer.setDays(demoForm.getTerms());
+		offer.setFrieghtCharge(demoForm.getFrieghtCharge());
 		
-		offer.setTerms(terms);
+		
 
         //name2room.put( name, room );
 

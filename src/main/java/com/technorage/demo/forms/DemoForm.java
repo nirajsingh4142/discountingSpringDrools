@@ -19,6 +19,7 @@ public class DemoForm {
 	private Integer priority;
 	private Integer combo;
 	private Integer isbn;
+	private String frieghtCharge;
     
 	//Order
 	private Integer orderLineNumber;
@@ -125,6 +126,12 @@ public class DemoForm {
 	}
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
+	}
+	public String getFrieghtCharge() {
+		return frieghtCharge;
+	}
+	public void setFrieghtCharge(String frieghtCharge) {
+		this.frieghtCharge = frieghtCharge;
 	}
 	
 }

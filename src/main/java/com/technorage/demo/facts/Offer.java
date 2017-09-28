@@ -20,6 +20,8 @@ public class Offer {
 	private Integer comboField;
 	
 	private List<Terms> terms = new ArrayList<Terms>();
+	private Integer days;
+    private String frieghtCharge;
 	public Offer() {
 		
 	}
@@ -62,6 +64,22 @@ public class Offer {
 
 	public void setComboField(Integer comboField) {
 		this.comboField = comboField;
+	}
+
+	public Integer getDays() {
+		return days;
+	}
+
+	public void setDays(Integer days) {
+		this.days = days;
+	}
+
+	public String getFrieghtCharge() {
+		return frieghtCharge;
+	}
+
+	public void setFrieghtCharge(String frieghtCharge) {
+		this.frieghtCharge = frieghtCharge;
 	}
 
 	
