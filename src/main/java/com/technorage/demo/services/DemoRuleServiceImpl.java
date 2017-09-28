@@ -159,10 +159,12 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		offer.setHardcode(demoForm.isHardcode());
 		offer.setPriority(demoForm.getPriority());
 		offer.setOverridenExplicitly(demoForm.isOverridenExplicitly());
+		
 		List<Terms> terms = new ArrayList<Terms>();
 		Terms newTerms = new Terms();
 		newTerms.setDays(demoForm.getTerms());
 		terms.add(newTerms);
+		
 		offer.setTerms(terms);
 
         //name2room.put( name, room );
@@ -205,7 +207,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	public void addOrder(DemoForm demoForm) {
 		
 		OrderLine orderLine = new OrderLine();
-	
+		orderLine.setOrderLineId(demoForm.getOrderLineNumber());
 		Account account = new Account();
 		account.setAccountNumber(demoForm.getAccountNumber());
 		account.setAccountType(demoForm.getAccountType());
@@ -216,10 +218,6 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		product.setIsbn(demoForm.getIsbn());
 		product.setProductGroupCode(demoForm.getDgp());
 		orderLine.setProduct(product);
-		
-		Discount discount = new Discount();
-		discount.setPercentage(demoForm.getDiscount());
-		orderLine.setDiscount(discount);
 		
         kieSession.insert( orderLine );
 

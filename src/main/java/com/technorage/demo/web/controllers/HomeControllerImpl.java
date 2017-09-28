@@ -48,7 +48,7 @@ public class HomeControllerImpl implements HomeController {
 	public String addOrder(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Adding Order: " + demoForm.getOrderLineNumber());
 			ruleService.addOrder(demoForm);
-			rooms.put(demoForm.getOrderLineNumber().toString(), demoForm.getOrderLineNumber().toString());
+			//rooms.put(demoForm.getOrderLineNumber().toString(), demoForm.getOrderLineNumber().toString());
 		
 		return getIndex(locale, model);
 	}

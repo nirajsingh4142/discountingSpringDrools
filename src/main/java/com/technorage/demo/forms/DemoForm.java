@@ -23,7 +23,6 @@ public class DemoForm {
 	//Order
 	private Integer orderLineNumber;
 	private Integer quantity;
-    private Integer listPrice;
     
     public String getRoomName() {
 		return roomName;
@@ -126,12 +125,6 @@ public class DemoForm {
 	}
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
-	}
-	public Integer getListPrice() {
-		return listPrice;
-	}
-	public void setListPrice(Integer listPrice) {
-		this.listPrice = listPrice;
 	}
 	
 }
