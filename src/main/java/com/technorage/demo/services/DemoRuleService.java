@@ -3,6 +3,7 @@ package com.technorage.demo.services;
 import java.util.Collection;
 
 import com.technorage.demo.facts.Alarm;
+import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
@@ -28,5 +29,6 @@ public interface DemoRuleService<T> {
 	void addOrder(DemoForm demoForm);
 
 	Collection<Sprinkler> checkSprinklers();
+	Collection<OrderSprinkler> checkOrderSprinklers();
     
 }

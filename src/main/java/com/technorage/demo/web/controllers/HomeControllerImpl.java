@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.technorage.demo.facts.Alarm;
+import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.forms.DemoForm;
@@ -65,6 +66,8 @@ public class HomeControllerImpl implements HomeController {
 		
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
 		model.addAttribute("sprinklers", sprinklers);
+		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
+		model.addAttribute("orderSprinklers", orderSprinklers);
 		
 		model.addAttribute("noOfAlarms", winner.substring(2));
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
@@ -97,11 +100,13 @@ public class HomeControllerImpl implements HomeController {
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		Collection<Alarm> alarms=ruleService.checkForFire();
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
+		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
 		
 		model.addAttribute("alarmsFound", alarms!=null && alarms.size()!=0? true:false );
 		model.addAttribute("noOfAlarms", alarms.size());
 		model.addAttribute("alarms", alarms);
 		model.addAttribute("sprinklers", sprinklers);
+		model.addAttribute("orderSprinklers", orderSprinklers);
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		model.addAttribute("rooms", rooms);
 		model.addAttribute("demoForm", new DemoForm());

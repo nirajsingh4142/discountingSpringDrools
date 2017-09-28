@@ -30,6 +30,7 @@ import com.technorage.demo.facts.Discount;
 import com.technorage.demo.facts.Fire;
 import com.technorage.demo.facts.Offer;
 import com.technorage.demo.facts.OrderLine;
+import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Product;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RuleSetup;
@@ -57,6 +58,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
 	private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
+	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
 	private FactFinder<RuleSetup> findRuleSetups = new FactFinder<>(RuleSetup.class);
 
 	@Autowired
@@ -174,6 +176,14 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 		return result;
 	}
+	@Override
+	public Collection<OrderSprinkler> checkOrderSprinklers() {
+
+		Collection<OrderSprinkler> result = findOrderSprinklers.findFacts(kieSession);
+
+		return result;
+	}
+	
 
 	@Override
 	public Room getRoom(String name) {
@@ -198,8 +208,8 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		orderLine.setProduct(product);
 
 		kieSession.insert( orderLine );
-		Sprinkler sprinkler = new Sprinkler( orderLine );
-		kieSession.insert( sprinkler );
+		OrderSprinkler orderSprinkler = new OrderSprinkler( orderLine );
+		kieSession.insert( orderSprinkler );
 
 	}
 

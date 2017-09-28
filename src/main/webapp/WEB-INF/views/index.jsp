@@ -233,23 +233,24 @@
 								</tr>
 							</thead>
 							<tbody>
-								<c:forEach var="sprinkler" varStatus="item"
-									items="${sprinklers}">
+								<c:forEach var="orderSprinkler" varStatus="item"
+									items="${orderSprinklers}">
 									<tr>
 										<form:form method="POST" action="generateOffer" commandName="demoForm">
-											<td>${sprinkler.orderLine.orderLineId}</td>
-											<td>${sprinkler.orderLine.account.accountNumber}</td>
-											<td>${sprinkler.orderLine.account.accountType}</td>
-											<td>${sprinkler.orderLine.product.familyCode}</td>
-											<td>${sprinkler.orderLine.product.productGroupCode}</td>
-											<td>${sprinkler.orderLine.product.isbn}</td>
-											<td>${sprinkler.orderLine.quantity}</td>
+											<td>${orderSprinkler.orderLine.orderLineId}</td>
+											<td>${orderSprinkler.orderLine.account.accountNumber}</td>
+											<td>${orderSprinkler.orderLine.account.accountType}</td>
+											<td>${orderSprinkler.orderLine.product.familyCode}</td>
+											<td>${orderSprinkler.orderLine.product.productGroupCode}</td>
+											<td>${orderSprinkler.orderLine.product.isbn}</td>
+											<td>${orderSprinkler.orderLine.quantity}</td>
 											<td><span class="input-group-btn"> <input class="btn btn-success" type="submit" value="Generate Offer" />
 											</span></td>
 										</form:form>
 									</tr>
-								</c:forEach>
-
+								 </c:forEach>
+								
+                            
 							</tbody>
 						</table>
 					</div>
