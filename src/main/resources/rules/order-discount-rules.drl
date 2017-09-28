@@ -1,0 +1,104 @@
+package business.rules;
+
+import com.technorage.demo.facts.OrderLine;
+import com.technorage.demo.facts.RuleSetup;
+import java.util.*;
+
+rule "Rule if Account Number, Product Group Code and Product ISBN Match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber ,
+       		product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
+       		product.isbn!=null, product.isbn == $line.product.isbn )
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Rule if Account Number and Product Group Code match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
+       		product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode), product.isbn == null)
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Rule if Account Number and Product ISBN match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
+       		product.productGroupCode == null, product.isbn!=null, product.isbn == $line.product.isbn )
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Rule if Product Group Code and Product ISBN match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
+       		account.accountNumber == null, product.isbn!=null, product.isbn == $line.product.isbn)
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Rule if Product Group Code match"
+   no-loop
+   when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
+       		account.accountNumber == null, product.isbn == null )
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Rule if Product ISBN match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(product.isbn!=null, product.isbn == $line.product.isbn, 
+       		account.accountNumber == null, product.productGroupCode == null )
+       	
+   then 
+   		modify($r){
+     		setIsQualified(true);
+     	}
+   
+end
+
+rule "Rule if Account Number match"
+    no-loop
+    when  
+       	$line: OrderLine() 
+       	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
+       		product.productGroupCode == null, product.isbn == null )
+
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+end
+

@@ -1,0 +1,37 @@
+package business.rules;
+
+import com.technorage.demo.facts.RuleSetup;
+
+/*
+rule "Decide Winning Rule"
+	salience -100
+	when
+		$list: List($rules: ruleSetup) 
+       	$setup: RuleSetup(isQualified) from $list
+       
+	then
+		System.out.println("Offer " + $setup.getRuleNumber());
+end	*/
+
+rule "Define priority P1 on basis of overridenExplicitly flag"
+	salience -50
+	enabled($r.winningPriority == "")
+	when
+		$r: RuleSetup(isQualified, offer.overridenExplicitly)
+	then
+		modify($r){
+			setWinningPriority("P1");
+		}
+end
+
+rule "Define priority P2 on basis of hardcode flag"
+	salience -50
+	enabled($r.winningPriority == "")
+	when
+		$r: RuleSetup(isQualified, offer.hardcode, !offer.overridenExplicitly)
+	then
+		modify($r){
+			setWinningPriority("P2");
+		}
+end
+
