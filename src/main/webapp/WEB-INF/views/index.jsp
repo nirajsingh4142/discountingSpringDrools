@@ -63,14 +63,22 @@
 				<c:out value="${error}" />
 			</div>
 		</c:if>
-
+		<c:choose>
+			<c:when test="${!qualifiers.equals(' ')}">
+				<div class="alert alert-success" role="alert">
+					Rules qualified: <strong><c:out value="${qualifiers}" /></strong>
+				</div>
+			</c:when>
+			
+		</c:choose>
+		
 		<c:choose>
 			<c:when test="${!noOfAlarms.equals(' ')}">
 				<div class="alert alert-success" role="alert">
 					Winner is Rule: <strong><c:out value="${noOfAlarms}" /></strong>
 				</div>
 			</c:when>
-
+			
 		</c:choose>
 
 		<h3>
@@ -101,13 +109,13 @@
 							class="form-control" />
 						<form:input path="discount" id="discount-input"
 							placeholder="Type discount" class="form-control" />
+						<form:input path="priority" id="priority-input" type="text"
+							placeholder="Type Priority" class="form-control" />
 						<form:input path="terms" id="terms-input" placeholder="Type terms"
 							class="form-control" />
 						<form:input path="frieghtCharge" id="frieghtCharge-input"
 							type="text" placeholder="Type Frieght Charge"
 							class="form-control" />
-						<form:input path="priority" id="priority-input" type="text"
-							placeholder="Type Priority" class="form-control" />
 						<form:input path="combo" id="combo-input"
 							placeholder="Type New Combo" class="form-control" />
 						<form:label path="overridenExplicitly">Overriden Explicitly: <form:checkbox
@@ -139,7 +147,7 @@
 							placeholder="Type order line number" class="form-control" />
 						<form:input path="accountNumber" id="accountNumber-input"
 							placeholder="Type account" class="form-control" />
-						<form:input path="accountType" id="accountType-input" type="text"
+						<form:input path="accountType" id="accountType-input" 
 							placeholder="Type account type" class="form-control" />
 						<form:input path="fc" id="fc-input" type="text"
 							placeholder="Type FC" class="form-control" />
@@ -183,9 +191,9 @@
 									<th>AT</th>
 									<th>Isbn</th>
 									<th>Discount</th>
+									<th>Priority</th>
 									<th>Terms</th>
 									<th>Frieght Charge</th>
-									<th>Priority</th>
 									<th>Combo</th>
 									<th>Overriden Explicitly</th>
 									<th>Hardcode</th>
@@ -248,9 +256,8 @@
 											</span></td>
 										</form:form>
 									</tr>
-								 </c:forEach>
-								
-                            
+								</c:forEach>
+
 							</tbody>
 						</table>
 					</div>

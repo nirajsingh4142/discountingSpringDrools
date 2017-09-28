@@ -16,6 +16,7 @@ public class RuleSetup implements Serializable {
 	private Discount discount;
 	private Offer offer;
 	private Boolean isQualified = false;
+	private Boolean isWinner = false;
 	private String winningPriority = "";
 
 	public Account getAccount() {
@@ -80,6 +81,14 @@ public class RuleSetup implements Serializable {
 
 	public void setWinningPriority(String winningPriority) {
 		this.winningPriority = winningPriority;
+	}
+
+	public Boolean getIsWinner() {
+		return isWinner;
+	}
+
+	public void setIsWinner(Boolean isWinner) {
+		this.isWinner = isWinner;
 	}
 
 

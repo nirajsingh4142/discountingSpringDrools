@@ -1,7 +1,11 @@
 package com.technorage.demo.web.controllers;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -11,11 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import com.technorage.demo.facts.OrderSprinkler;
 
 import com.technorage.demo.facts.Alarm;
-import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
+import com.technorage.demo.facts.Terms;
 import com.technorage.demo.forms.DemoForm;
 import com.technorage.demo.forms.RuleSetupForm;
 import com.technorage.demo.services.DemoRuleService;
@@ -37,6 +42,7 @@ public class HomeControllerImpl implements HomeController {
 	public String index(Locale locale, Model model) {
 		return getIndex(locale, model);
 	}
+
 	@Override
 	public String addRoom(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Adding room: " + demoForm.getRoomName());
@@ -57,21 +63,80 @@ public class HomeControllerImpl implements HomeController {
 	@Override
 	public String generateOffer(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Generating Offer for order line: : " + demoForm.getOrderLineNumber());
-		
+		List<String> priorityList = new ArrayList<String>();
+		List<RuleSetup> rulesQualified = new ArrayList<RuleSetup>();;
 		Collection<RuleSetup> ruleSetupList = ruleService.generateOffer(null);
-		String winner = " ";
-		for(RuleSetup ruleSetup : ruleSetupList) {
-			winner = winner + ", " + ruleSetup.getRuleName();
-		}
 		
-		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
-		model.addAttribute("sprinklers", sprinklers);
+		Integer maxPriority = 0;
+		Double totalDiscount = 0.0;
+		String winnerRules = "";
+		String terms = "";
+		String winner = " ";
+		String qualifierList = " ";
+
+		for(RuleSetup ruleSetup : ruleSetupList) {
+			qualifierList = qualifierList + ", " + ruleSetup.getRuleName();
+			priorityList.add(ruleSetup.getWinningPriority());
+			rulesQualified.add(ruleSetup);
+
+			if(ruleSetup.getOffer().getPriority() > maxPriority) {
+				maxPriority = ruleSetup.getOffer().getPriority();
+			}
+
+		}
+
+		sortListOnBasisOfRule(rulesQualified);
+
+		for(RuleSetup setup : rulesQualified) {
+
+			//Display winner with combo field parameters excluded
+			if(setup.getOffer().getComboField() == null) {
+				if(setup.getWinningPriority().equals("P1")) {
+					winner = winner + ", " + setup.getRuleName();
+					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
+					break;
+
+				} else if(!priorityList.contains("P1") && setup.getWinningPriority().equals("P2")) {
+					winner = winner + ", " + setup.getRuleName();
+					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
+					break;
+
+				} else if(setup.getOffer().getPriority() == maxPriority) {
+					winner = winner + ", " + setup.getRuleName();
+					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
+					break;
+				} 
+			} 
+
+			//Display winner with combo field parameters included
+			else if(setup.getIsWinner()) {
+				winner = winner + ", " + setup.getRuleName();
+				if(setup.getDiscount()!=null) {
+					totalDiscount = totalDiscount + setup.getDiscount().getPercentage();
+					winnerRules = winnerRules + ", " + setup.getRuleNumber();
+				}
+
+				for(Terms term : setup.getOffer().getTerms()) {
+					if(term.getDays() != 0) {
+						terms = " and Term " + term.getDays() + " days from Rule " + setup.getRuleNumber();
+					}
+					if(term.getFreeFreight()) {
+						terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
+					}
+				}
+			}
+		}
+
+
+		Collection<Sprinkler> sprinklers = ruleService.checkSprinklers();
 		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
+		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
 		
 		model.addAttribute("noOfAlarms", winner.substring(2));
+		model.addAttribute("qualifiers", qualifierList.substring(2));
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
-		
+
 		return ("index");
 	}
 
@@ -104,6 +169,7 @@ public class HomeControllerImpl implements HomeController {
 		
 		model.addAttribute("alarmsFound", alarms!=null && alarms.size()!=0? true:false );
 		model.addAttribute("noOfAlarms", alarms.size());
+		model.addAttribute("qualifiers", alarms.size());
 		model.addAttribute("alarms", alarms);
 		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
@@ -119,6 +185,14 @@ public class HomeControllerImpl implements HomeController {
 
 		System.out.println("Hell its Niraj");
 		return null;
+	}
+
+	private static void sortListOnBasisOfRule(List<RuleSetup> rulesQualified) {
+		Collections.sort(rulesQualified, new Comparator<RuleSetup>(){
+			public int compare(RuleSetup o1, RuleSetup o2){
+				return o1.getRuleNumber() - o2.getRuleNumber();
+			}
+		});
 	}
 
 }

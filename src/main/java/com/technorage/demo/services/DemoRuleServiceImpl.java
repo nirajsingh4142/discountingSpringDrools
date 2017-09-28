@@ -16,6 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import com.technorage.demo.facts.OrderSprinkler;
 
 import com.technorage.demo.drools.FactFinder;
 import com.technorage.demo.drools.monitoring.TrackingAgendaEventListener;
@@ -30,9 +31,9 @@ import com.technorage.demo.facts.Discount;
 import com.technorage.demo.facts.Fire;
 import com.technorage.demo.facts.Offer;
 import com.technorage.demo.facts.OrderLine;
-import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Product;
 import com.technorage.demo.facts.Room;
+import com.technorage.demo.facts.RulePrecedence;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.forms.DemoForm;
@@ -55,10 +56,10 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	private Map<String,Room> name2room = new HashMap<String,Room>();
 	private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
-
+	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
+	
 	private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
 	private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
-	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
 	private FactFinder<RuleSetup> findRuleSetups = new FactFinder<>(RuleSetup.class);
 
 	@Autowired
@@ -116,19 +117,31 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	@Override
 	public void addRoom(DemoForm demoForm) {
-
+		
 		RuleSetup ruleSetup = new RuleSetup();
 		ruleSetup.setRuleNumber(demoForm.getRuleNumber());
 		ruleSetup.setRuleName(demoForm.getRuleName());
 		Account account = new Account();
 		account.setAccountNumber(demoForm.getAccountNumber());
-		account.setAccountType(demoForm.getAccountType());
+		if(demoForm.getAccountType().equals("")) {
+			account.setAccountType(null);
+		}else {
+			account.setAccountType(demoForm.getAccountType());
+		}
 		ruleSetup.setAccount(account);
 
 		Product product = new Product();
-		product.setFamilyCode(demoForm.getFc());
+		if(demoForm.getFc().equals("")) {
+			product.setFamilyCode(null);
+		}else {
+			product.setFamilyCode(demoForm.getFc());
+		}
 		product.setIsbn(demoForm.getIsbn());
-		product.setProductGroupCode(demoForm.getDgp());
+		if(demoForm.getDgp().equals("")) {
+			product.setProductGroupCode(null);
+		}else {
+			product.setProductGroupCode(demoForm.getDgp());
+		}
 		ruleSetup.setProduct(product);
 
 		Discount discount = new Discount();
@@ -146,18 +159,11 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 		ruleSetup.setOffer(offer);
 
-
-		//name2room.put( name, room );
-
-		kieSession.insert( ruleSetup );
+		kieSession.insert(ruleSetup );
+		kieSession.insert(ruleSetup.getOffer());
 
 		Sprinkler sprinkler = new Sprinkler( ruleSetup );
-
 		kieSession.insert( sprinkler );
-
-
-		//kieSession.fireAllRules();
-
 
 	}
 
@@ -176,14 +182,6 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 		return result;
 	}
-	@Override
-	public Collection<OrderSprinkler> checkOrderSprinklers() {
-
-		Collection<OrderSprinkler> result = findOrderSprinklers.findFacts(kieSession);
-
-		return result;
-	}
-	
 
 	@Override
 	public Room getRoom(String name) {
@@ -213,14 +211,15 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	}
 
-	@Override
+	@Override	
 	public Collection<RuleSetup> generateOffer(DemoForm demoForm) {
+		loadPropFile();
+		
 		System.out.println("Bootstrapping the Rule Engine ..." );
 		kieSession.fireAllRules();
-		System.out.println("Rules fired");
+		System.out.println("Rules fired: " + kieSession.fireAllRules());
 		
 		Collection<RuleSetup> result = findRuleSetups.findFacts(kieSession);
-		
 		List<RuleSetup> finalRule = new ArrayList<RuleSetup>();
 		
 		for(RuleSetup rule : result) {
@@ -233,6 +232,22 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		System.out.println("Bootstrapping the Rule Engine ..." );
 		
 		return finalRule;
+	}
+	
+	@Override
+	public Collection<OrderSprinkler> checkOrderSprinklers() {
+
+		Collection<OrderSprinkler> result = findOrderSprinklers.findFacts(kieSession);
+
+		return result;
+	}
+	
+	private void loadPropFile() {
+		//load dynamic prop file
+		List<RulePrecedence> rulePrecedences = RulePrecedenceBuilder.loadRulePrecedence();
+		for(RulePrecedence precedences : rulePrecedences) {
+			kieSession.insert(precedences);
+		}
 	}
 
 

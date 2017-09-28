@@ -89,6 +89,33 @@ rule "Rule if Product ISBN match"
    
 end
 
+rule "Rule if Account Type match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(account.accountType!=null, account.accountType.equals($line.account.accountType),
+       	product.isbn == null)
+       	
+   then 
+   		modify($r){
+     		setIsQualified(true);
+     	}
+end
+
+rule "Rule if Account Type and Product ISBN match"
+    no-loop
+    when  
+       	$line: OrderLine()  
+       	$r: RuleSetup(account.accountType!=null, account.accountType.equals($line.account.accountType),
+       		product.isbn!=null, product.isbn == $line.product.isbn )
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
 rule "Rule if Account Number match"
     no-loop
     when  
