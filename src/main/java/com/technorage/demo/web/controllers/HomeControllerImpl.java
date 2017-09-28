@@ -79,7 +79,7 @@ public class HomeControllerImpl implements HomeController {
 			priorityList.add(ruleSetup.getWinningPriority());
 			rulesQualified.add(ruleSetup);
 
-			if(ruleSetup.getOffer().getPriority() > maxPriority) {
+			if(ruleSetup.getOffer().getPriority() !=null && ruleSetup.getOffer().getPriority() > maxPriority) {
 				maxPriority = ruleSetup.getOffer().getPriority();
 			}
 
@@ -110,23 +110,25 @@ public class HomeControllerImpl implements HomeController {
 
 			//Display winner with combo field parameters included
 			else if(setup.getIsWinner()) {
-				winner = winner + ", " + setup.getRuleName();
-				if(setup.getDiscount()!=null) {
+				if(setup.getDiscount()!=null && setup.getDiscount().getPercentage()!=null) {
+					winner = winner + ", " + setup.getRuleName();
 					totalDiscount = totalDiscount + setup.getDiscount().getPercentage();
 					winnerRules = winnerRules + ", " + setup.getRuleNumber();
 				}
 
-				for(Terms term : setup.getOffer().getTerms()) {
-					if(term.getDays() != 0) {
-						terms = " and Term " + term.getDays() + " days from Rule " + setup.getRuleNumber();
-					}
-					if(term.getFreeFreight()) {
-						terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
-					}
+				if(setup.getOffer().getDays() != null) {
+					terms = " and Term " + setup.getOffer().getDays() + " days from Rule " + setup.getRuleNumber();
+				}
+				if(setup.getOffer().getFrieghtCharge().equalsIgnoreCase("false")) {
+					terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
 				}
 			}
+			
 		}
-
+		
+		if(!winnerRules.isEmpty()) {
+			winner = "  Rule " + winnerRules.substring(2) + " wins with discount: " + totalDiscount + "%" + terms;
+		}
 
 		Collection<Sprinkler> sprinklers = ruleService.checkSprinklers();
 		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
