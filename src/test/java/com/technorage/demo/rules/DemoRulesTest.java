@@ -1,4 +1,4 @@
-package com.technorage.demo.rules;
+/*package com.technorage.demo.rules;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -87,9 +87,9 @@ public class DemoRulesTest {
         kieSession.fireAllRules();
     }
 
-    /**
+    *//**
      * If this passes, then the Spring components were autowired.
-     */
+     *//*
     @Test
     public void shouldConfigureDroolsComponents() {
         assertNotNull(kieServices);
@@ -139,3 +139,4 @@ public class DemoRulesTest {
    
     
 }
+*/

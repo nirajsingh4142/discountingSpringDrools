@@ -1,4 +1,4 @@
-package com.technorage.demo.services;
+/*package com.technorage.demo.services;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -116,3 +116,4 @@ public class DemoRuleServiceTest {
     
     
 }
+*/

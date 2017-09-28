@@ -1,4 +1,4 @@
-package com.technorage.demo.rules;
+/*package com.technorage.demo.rules;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,3 +15,4 @@ public static Date getDateFromStringTest(String date) throws ParseException{
     	return tDate;
     }
 }
+*/
