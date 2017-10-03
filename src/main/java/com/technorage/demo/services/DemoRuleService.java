@@ -7,6 +7,8 @@ import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
+import com.technorage.demo.facts.StandardRuleSetup;
+import com.technorage.demo.facts.StandardSprinkler;
 import com.technorage.demo.forms.DemoForm;
 
 
@@ -26,9 +28,16 @@ public interface DemoRuleService<T> {
 	
 	Collection<RuleSetup> generateOffer(DemoForm demoForm);
 	
+	Collection<StandardRuleSetup> getStandardRulesQualified(DemoForm demoForm);
+	
 	void addOrder(DemoForm demoForm);
 
 	Collection<Sprinkler> checkSprinklers();
+	
 	Collection<OrderSprinkler> checkOrderSprinklers();
+	
+	Collection<StandardSprinkler> checkStandardSprinklers();
+
+	void addStandardRule(DemoForm demoForm);
     
 }

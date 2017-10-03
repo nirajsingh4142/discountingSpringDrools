@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import com.technorage.demo.facts.OrderSprinkler;
 
 import com.technorage.demo.drools.FactFinder;
 import com.technorage.demo.drools.monitoring.TrackingAgendaEventListener;
@@ -31,11 +30,14 @@ import com.technorage.demo.facts.Discount;
 import com.technorage.demo.facts.Fire;
 import com.technorage.demo.facts.Offer;
 import com.technorage.demo.facts.OrderLine;
+import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Product;
 import com.technorage.demo.facts.Room;
 import com.technorage.demo.facts.RulePrecedence;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
+import com.technorage.demo.facts.StandardRuleSetup;
+import com.technorage.demo.facts.StandardSprinkler;
 import com.technorage.demo.forms.DemoForm;
 
 @Service
@@ -57,10 +59,12 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	private Map<String,Room> name2room = new HashMap<String,Room>();
 	private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
 	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
+	private FactFinder<StandardSprinkler> findStandardSprinkler=new FactFinder<>(StandardSprinkler.class);
 	
 	private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
 	private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
 	private FactFinder<RuleSetup> findRuleSetups = new FactFinder<>(RuleSetup.class);
+	private FactFinder<StandardRuleSetup> findStandardRuleSetups = new FactFinder<>(StandardRuleSetup.class);
 
 	@Autowired
 	public DemoRuleServiceImpl(
@@ -117,6 +121,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	@Override
 	public void addRoom(DemoForm demoForm) {
+		HashMap<Integer, Integer> map = new HashMap<>();
 		
 		RuleSetup ruleSetup = new RuleSetup();
 		ruleSetup.setRuleNumber(demoForm.getRuleNumber());
@@ -158,11 +163,84 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		offer.setFrieghtCharge(demoForm.getFrieghtCharge());
 
 		ruleSetup.setOffer(offer);
-
+		
+		ruleSetup.setDiscountRange1(demoForm.getDiscountRange1());
+		ruleSetup.setDiscountRange2(demoForm.getDiscountRange2());
+		ruleSetup.setQuantityRange1(demoForm.getQuantityRange1());
+		ruleSetup.setQuantityRange2(demoForm.getQuantityRange2());
+		
+		if(demoForm.getQuantityRange1()!=null && demoForm.getDiscountRange1()!=null) {
+			map.put(demoForm.getQuantityRange1(), demoForm.getDiscountRange1());
+		}
+		if(demoForm.getQuantityRange2()!=null && demoForm.getDiscountRange2()!=null) {
+			map.put(demoForm.getQuantityRange2(), demoForm.getDiscountRange2());
+		}
+		
+		ruleSetup.setMap(map);
+		
 		kieSession.insert(ruleSetup );
 		kieSession.insert(ruleSetup.getOffer());
 
 		Sprinkler sprinkler = new Sprinkler( ruleSetup );
+		kieSession.insert( sprinkler );
+
+	}
+	
+	@Override
+	public void addStandardRule(DemoForm demoForm) {
+		HashMap<Integer, Integer> map = new HashMap<>();
+		StandardRuleSetup standardRuleSetup = new StandardRuleSetup();
+		standardRuleSetup.setRuleNumber(demoForm.getRuleNumber());
+		standardRuleSetup.setRuleName(demoForm.getRuleName());
+		
+		Account account = new Account();
+		if(demoForm.getAccountType().equals("")) {
+			account.setAccountType(null);
+		}else {
+			account.setAccountType(demoForm.getAccountType());
+		}
+		standardRuleSetup.setAccount(account);
+
+		Product product = new Product();
+		if(demoForm.getFc().equals("")) {
+			product.setFamilyCode(null);
+		}else {
+			product.setFamilyCode(demoForm.getFc());
+		}
+		product.setIsbn(demoForm.getIsbn());
+		standardRuleSetup.setProduct(product);
+
+		standardRuleSetup.setDiscountRange1(demoForm.getDiscountRange1());
+		standardRuleSetup.setDiscountRange2(demoForm.getDiscountRange2());
+		standardRuleSetup.setQuantityRange1(demoForm.getQuantityRange1());
+		standardRuleSetup.setQuantityRange2(demoForm.getQuantityRange2());
+		standardRuleSetup.setDiscountRange3(demoForm.getDiscountRange3());
+		standardRuleSetup.setQuantityRange3(demoForm.getQuantityRange3());
+		
+		if(demoForm.getQuantityRange1()!=null && demoForm.getDiscountRange1()!=null) {
+			map.put(demoForm.getQuantityRange1(), demoForm.getDiscountRange1());
+		}
+		if(demoForm.getQuantityRange2()!=null && demoForm.getDiscountRange2()!=null) {
+			map.put(demoForm.getQuantityRange2(), demoForm.getDiscountRange2());
+		}
+		if(demoForm.getQuantityRange3()!=null && demoForm.getDiscountRange3()!=null) {
+			map.put(demoForm.getQuantityRange3(), demoForm.getDiscountRange3());
+		}
+		
+		standardRuleSetup.setMap(map);
+		
+		Offer offer =new Offer();
+		offer.setComboField(demoForm.getCombo());
+		offer.setHardcode(demoForm.isHardcode());
+		offer.setPriority(demoForm.getPriority());
+		offer.setOverridenExplicitly(demoForm.isOverridenExplicitly());
+
+		offer.setDays(demoForm.getTerms());
+		offer.setFrieghtCharge(demoForm.getFrieghtCharge());
+
+		kieSession.insert(standardRuleSetup );
+
+		StandardSprinkler sprinkler = new StandardSprinkler( standardRuleSetup );
 		kieSession.insert( sprinkler );
 
 	}
@@ -204,6 +282,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		product.setIsbn(demoForm.getIsbn());
 		product.setProductGroupCode(demoForm.getDgp());
 		orderLine.setProduct(product);
+		orderLine.setQuantity(demoForm.getQuantity());
 
 		kieSession.insert( orderLine );
 		OrderSprinkler orderSprinkler = new OrderSprinkler( orderLine );
@@ -234,6 +313,21 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		return finalRule;
 	}
 	
+	public Collection<StandardRuleSetup> getStandardRulesQualified() {
+		Collection<StandardRuleSetup> standardRuleResult = findStandardRuleSetups.findFacts(kieSession);
+		List<StandardRuleSetup> standardRulesQualified = new ArrayList<StandardRuleSetup>();
+		
+		for(StandardRuleSetup rule : standardRuleResult) {
+			if(rule.getIsQualified()) {
+				standardRulesQualified.add(rule);
+				
+				System.out.println("Standard Rules qualified: " + rule.getRuleName());
+			}
+		}
+		
+		return standardRulesQualified;
+	}
+	
 	@Override
 	public Collection<OrderSprinkler> checkOrderSprinklers() {
 
@@ -250,5 +344,33 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		}
 	}
 
+	@Override
+	public Collection<StandardSprinkler> checkStandardSprinklers() {
+		Collection<StandardSprinkler> result = findStandardSprinkler.findFacts(kieSession);
+		
+		return result;
+	}
+
+	@Override	
+	public Collection<StandardRuleSetup> getStandardRulesQualified(DemoForm demoForm) {
+		loadPropFile();
+		
+		System.out.println("Bootstrapping the Rule Engine ..." );
+		kieSession.fireAllRules();
+		System.out.println("Rules fired: " + kieSession.fireAllRules());
+		
+		Collection<StandardRuleSetup> finalRule = findStandardRuleSetups.findFacts(kieSession);
+		
+		for(StandardRuleSetup rule : finalRule) {
+			if(rule.getIsQualified()) {
+				finalRule.add(rule);
+				System.out.println("Rules qualified: " + rule.getRuleName());
+			}
+		}
+		
+		System.out.println("Bootstrapping the Rule Engine ..." );
+		
+		return finalRule;
+	}
 
 }

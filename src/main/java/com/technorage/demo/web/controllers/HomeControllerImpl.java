@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import com.technorage.demo.facts.OrderSprinkler;
 
 import com.technorage.demo.facts.Alarm;
+import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
-import com.technorage.demo.facts.Terms;
+import com.technorage.demo.facts.StandardRuleSetup;
+import com.technorage.demo.facts.StandardSprinkler;
 import com.technorage.demo.forms.DemoForm;
 import com.technorage.demo.forms.RuleSetupForm;
 import com.technorage.demo.services.DemoRuleService;
@@ -64,16 +67,19 @@ public class HomeControllerImpl implements HomeController {
 	public String generateOffer(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Generating Offer for order line: : " + demoForm.getOrderLineNumber());
 		List<String> priorityList = new ArrayList<String>();
-		List<RuleSetup> rulesQualified = new ArrayList<RuleSetup>();;
+		List<RuleSetup> rulesQualified = new ArrayList<RuleSetup>();
+		Collection<StandardRuleSetup> standardRulesQualified = ruleService.getStandardRulesQualified(null);
 		Collection<RuleSetup> ruleSetupList = ruleService.generateOffer(null);
-		
+		Collection<OrderSprinkler> orderSprinklers = ruleService.checkOrderSprinklers();
+
 		Integer maxPriority = 0;
 		Double totalDiscount = 0.0;
 		String winnerRules = "";
 		String terms = "";
 		String winner = " ";
 		String qualifierList = " ";
-
+		boolean flag = false;
+		
 		for(RuleSetup ruleSetup : ruleSetupList) {
 			qualifierList = qualifierList + ", " + ruleSetup.getRuleName();
 			priorityList.add(ruleSetup.getWinningPriority());
@@ -82,11 +88,41 @@ public class HomeControllerImpl implements HomeController {
 			if(ruleSetup.getOffer().getPriority() !=null && ruleSetup.getOffer().getPriority() > maxPriority) {
 				maxPriority = ruleSetup.getOffer().getPriority();
 			}
+			
+			if(!ruleSetup.getMap().isEmpty()) {
+				flag = true;
+			}
 
 		}
 
 		sortListOnBasisOfRule(rulesQualified);
-
+		int usedQty = 0;
+		int discount = 0;
+		
+		//Example Logic 10
+		
+		
+		
+		if(flag) {
+			for(OrderSprinkler lines : orderSprinklers) {
+				usedQty = lines.getOrderLine().getQuantity();
+				flag = true;
+			}
+			
+			for(RuleSetup setup : rulesQualified) {
+				discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
+				winner = "  " + setup.getRuleName() + " qualified with discount: " + discount + "%";
+			}
+			
+			if(winner.equals(" ")) {
+				for(StandardRuleSetup setup : standardRulesQualified) {
+					discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
+					winner = "  " +  setup.getRuleName() + " qualified with discount: " + discount + "%";
+				}
+			}
+		}
+		
+		
 		for(RuleSetup setup : rulesQualified) {
 
 			//Display winner with combo field parameters excluded
@@ -123,19 +159,22 @@ public class HomeControllerImpl implements HomeController {
 					terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
 				}
 			}
-			
+
 		}
-		
+
 		if(!winnerRules.isEmpty()) {
 			winner = "  Rule " + winnerRules.substring(2) + " wins with discount: " + totalDiscount + "%" + terms;
 		}
 
 		Collection<Sprinkler> sprinklers = ruleService.checkSprinklers();
-		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
+		Collection<StandardSprinkler> standardSprinklers=ruleService.checkStandardSprinklers();
+
 		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
-		
+		model.addAttribute("standardSprinklers", standardSprinklers);
+
 		model.addAttribute("noOfAlarms", winner.substring(2));
+			
 		model.addAttribute("qualifiers", qualifierList.substring(2));
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 
@@ -168,13 +207,15 @@ public class HomeControllerImpl implements HomeController {
 		Collection<Alarm> alarms=ruleService.checkForFire();
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
 		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
-		
+
+		Collection<StandardSprinkler> standardSprinklers=ruleService.checkStandardSprinklers();
 		model.addAttribute("alarmsFound", alarms!=null && alarms.size()!=0? true:false );
 		model.addAttribute("noOfAlarms", alarms.size());
 		model.addAttribute("qualifiers", alarms.size());
 		model.addAttribute("alarms", alarms);
 		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
+		model.addAttribute("standardSprinklers", standardSprinklers);
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		model.addAttribute("rooms", rooms);
 		model.addAttribute("demoForm", new DemoForm());
@@ -189,12 +230,31 @@ public class HomeControllerImpl implements HomeController {
 		return null;
 	}
 
+	@Override
+	public String addStandardRule(DemoForm demoForm, Locale locale, Model model) {
+		logger.info("Adding Standard Rule: " + demoForm.getRuleName());
+		ruleService.addStandardRule(demoForm);
+		rooms.put(demoForm.getRuleName(), demoForm.getRuleName());
+
+		return getIndex(locale, model);
+	}
+
 	private static void sortListOnBasisOfRule(List<RuleSetup> rulesQualified) {
 		Collections.sort(rulesQualified, new Comparator<RuleSetup>(){
 			public int compare(RuleSetup o1, RuleSetup o2){
 				return o1.getRuleNumber() - o2.getRuleNumber();
 			}
 		});
+	}
+
+	private static Integer getDiscountOnBasisOfQty(Integer quantity, HashMap<Integer, Integer> map) {
+		for (Entry<Integer, Integer> entry : map.entrySet()) {
+			if (quantity <= entry.getKey()) {
+				return entry.getValue();
+			}
+		}
+
+		return 0;
 	}
 
 }

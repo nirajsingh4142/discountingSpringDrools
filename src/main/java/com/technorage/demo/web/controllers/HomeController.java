@@ -34,4 +34,8 @@ public interface HomeController {
     @RequestMapping(value="/addRule", method=RequestMethod.POST)
     public String addRule(@ModelAttribute RuleSetupForm ruleSetupForm,Locale locale, Model model);
     
+    @RequestMapping(value="/addStandardRule", method=RequestMethod.POST)
+	String addStandardRule(DemoForm demoForm, Locale locale, Model model);
+
+    
 }

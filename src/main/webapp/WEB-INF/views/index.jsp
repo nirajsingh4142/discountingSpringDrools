@@ -126,6 +126,14 @@
 								path="hardcode" id="hardcode-input" placeholder="check harcode"
 								class="form-control" />
 						</form:label>
+						<form:input path="quantityRange1" id="quantityRange1-input"
+							placeholder="Type quantity Range1" class="form-control" />
+						<form:input path="discountRange1" id="discountRange1-input"
+							placeholder="Type discount Range1" class="form-control" />
+						<form:input path="quantityRange2" id="quantityRange2-input"
+							placeholder="Type quantity Range2" class="form-control" />
+						<form:input path="discountRange2" id="discountRange2-input"
+							placeholder="Type discount Range2" class="form-control" />
 
 						<span class="input-group-btn"> <input
 							class="btn btn-success" type="submit" value="Add Rule" />
@@ -134,7 +142,46 @@
 				</form:form>
 			</div>
 		</div>
+		
+		<!-- STANDARD RULE SETUP SECTION-->
+		<div class="page-header">
+			<h1>Add Standard Rules</h1>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<form:form method="POST" action="addStandardRule" commandName="demoForm">
+					<div class="input-group">
+						<form:input path="ruleNumber" id="ruleNumber-input"
+							placeholder="Type rule number" class="form-control" />
+						<form:input path="ruleName" id="ruleName-input" type="text"
+							placeholder="Type rule Name" class="form-control" />
+						<form:input path="accountType" id="accountType-input" type="text"
+							placeholder="Type account type" class="form-control" />
+						<form:input path="fc" id="fc-input" type="text"
+							placeholder="Type FC" class="form-control" />
+						<form:input path="isbn" id="isbn-input" placeholder="Type isbn"
+							class="form-control" />
+						<form:input path="quantityRange1" id="quantityRange1-input"
+							placeholder="Type quantity Range1" class="form-control" />
+						<form:input path="discountRange1" id="discountRange1-input"
+							placeholder="Type discount Range1" class="form-control" />
+						<form:input path="quantityRange2" id="quantityRange2-input"
+							placeholder="Type quantity Range2" class="form-control" />
+						<form:input path="discountRange2" id="discountRange2-input"
+							placeholder="Type discount Range2" class="form-control" />
+						<form:input path="quantityRange3" id="quantityRange3-input"
+							placeholder="Type quantity Range3" class="form-control" />
+						<form:input path="discountRange3" id="discountRange3-input"
+							placeholder="Type discount Range3" class="form-control" />
 
+						<span class="input-group-btn"> <input
+							class="btn btn-success" type="submit" value="Add Standard Rule" />
+						</span>
+					</div>
+				</form:form>
+			</div>
+		</div>
+		
 		<!-- ORDER SETUP SECTION-->
 		<div class="page-header">
 			<h1>Add Order Lines</h1>
@@ -167,12 +214,13 @@
 		</div>
 
 		<!-- Added Rules are displayed below -->
-		>
+
 		<ul class="nav nav-tabs" role="tablist">
 			<li class="active"><a href="#room" role="tab" data-toggle="tab">Rule
 					Set</a></li>
 			<li><a href="#orderLine" role="tab" data-toggle="tab">Order
 					Lines</a></li>
+			<li><a href="#standardRule" role="tab" data-toggle="tab">Standard Rule</a></li>
 		</ul>
 
 		<!-- Tab panes -->
@@ -197,6 +245,10 @@
 									<th>Combo</th>
 									<th>Overriden Explicitly</th>
 									<th>Hardcode</th>
+									<th>Quantity Range1</th>
+									<th>Discount Range1</th>
+									<th>Quantity Range2</th>
+									<th>Discount Range2</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -217,9 +269,55 @@
 										<td>${sprinkler.ruleSetup.offer.comboField}</td>
 										<td>${sprinkler.ruleSetup.offer.overridenExplicitly}</td>
 										<td>${sprinkler.ruleSetup.offer.hardcode}</td>
+										<td>${sprinkler.ruleSetup.quantityRange1}</td>
+										<td>${sprinkler.ruleSetup.discountRange1}</td>
+										<td>${sprinkler.ruleSetup.quantityRange2}</td>
+										<td>${sprinkler.ruleSetup.discountRange2}</td>
 									</tr>
 								</c:forEach>
 							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			
+			<div class="tab-pane" id="standardRule">
+				<div class="row">
+					<div class="col-md-12">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>Rule Number</th>
+									<th>Rule Name</th>
+									<th>Account Type</th>
+									<th>FC</th>
+									<th>Isbn</th>
+									<th>Quantity Range1</th>
+									<th>Discount Range1</th>
+									<th>Quantity Range2</th>
+									<th>Discount Range2</th>
+									<th>Quantity Range3</th>
+									<th>Discount Range3</th>
+								</tr>
+							</thead>
+							<tbody>
+								<c:forEach var="standardSprinkler" varStatus="item"
+									items="${standardSprinklers}">
+									<tr>
+										<td>${standardSprinkler.standardRule.ruleNumber}</td>
+										<td>${standardSprinkler.standardRule.ruleName}</td>
+										<td>${standardSprinkler.standardRule.account.accountType}</td>
+										<td>${standardSprinkler.standardRule.product.familyCode}</td>
+										<td>${standardSprinkler.standardRule.product.isbn}</td>
+										<td>${standardSprinkler.standardRule.quantityRange1}</td>
+										<td>${standardSprinkler.standardRule.discountRange1}</td>
+										<td>${standardSprinkler.standardRule.quantityRange2}</td>
+										<td>${standardSprinkler.standardRule.discountRange2}</td>
+										<td>${standardSprinkler.standardRule.quantityRange3}</td>
+										<td>${standardSprinkler.standardRule.discountRange3}</td>
+									</tr>
+								</c:forEach>
+							</tbody> 
 						</table>
 					</div>
 				</div>
@@ -266,8 +364,6 @@
 		</div>
 	</div>
 	<!-- /container -->
-
-
 
 	<!-- Latest compiled and minified Jquery and Bootstrap JavaScript -->
 	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>

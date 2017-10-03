@@ -3,11 +3,12 @@ package com.technorage.demo.facts;
 import java.io.Serializable;
 import java.util.HashMap;
 
+
 /**
  * @author raghav.rampal
  *
  */
-public class RuleSetup implements Serializable {
+public class StandardRuleSetup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Integer ruleNumber;
@@ -15,15 +16,17 @@ public class RuleSetup implements Serializable {
 	private Account account;
 	private Product product;
 	private Discount discount;
-	private Offer offer;
 	private Boolean isQualified = false;
 	private Boolean isWinner = false;
-	private String winningPriority = "";
+	
 	private Integer discountRange1;
 	private Integer discountRange2;
 	private Integer quantityRange1;
 	private Integer quantityRange2;
+	private Integer quantityRange3;
+	private Integer discountRange3;
 	private HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+	
 
 	public Account getAccount() {
 		return account;
@@ -49,14 +52,6 @@ public class RuleSetup implements Serializable {
 		this.discount = discount;
 	}
 
-	public Offer getOffer() {
-		return offer;
-	}
-
-	public void setOffer(Offer offer) {
-		this.offer = offer;
-	}
-	
 	public String getRuleName() {
 		return ruleName;
 	}
@@ -79,14 +74,6 @@ public class RuleSetup implements Serializable {
 
 	public void setIsQualified(Boolean isQualified) {
 		this.isQualified = isQualified;
-	}
-
-	public String getWinningPriority() {
-		return winningPriority;
-	}
-
-	public void setWinningPriority(String winningPriority) {
-		this.winningPriority = winningPriority;
 	}
 
 	public Boolean getIsWinner() {
@@ -129,6 +116,22 @@ public class RuleSetup implements Serializable {
 		this.quantityRange2 = quantityRange2;
 	}
 
+	public Integer getQuantityRange3() {
+		return quantityRange3;
+	}
+
+	public void setQuantityRange3(Integer quantityRange3) {
+		this.quantityRange3 = quantityRange3;
+	}
+
+	public Integer getDiscountRange3() {
+		return discountRange3;
+	}
+
+	public void setDiscountRange3(Integer discountRange3) {
+		this.discountRange3 = discountRange3;
+	}
+
 	public HashMap<Integer, Integer> getMap() {
 		return map;
 	}
@@ -136,5 +139,6 @@ public class RuleSetup implements Serializable {
 	public void setMap(HashMap<Integer, Integer> map) {
 		this.map = map;
 	}
+	
 
 }
