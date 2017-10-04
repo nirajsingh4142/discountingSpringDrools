@@ -40,4 +40,6 @@ public interface DemoRuleService<T> {
 
 	void addStandardRule(DemoForm demoForm);
     
+	void delOrderSprinklers();
+	void disposeKiSession();
 }

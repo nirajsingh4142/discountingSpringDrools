@@ -60,11 +60,14 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
 	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
 	private FactFinder<StandardSprinkler> findStandardSprinkler=new FactFinder<>(StandardSprinkler.class);
-	
+
 	private FactFinder<Alarm> findAlarms=new FactFinder<>(Alarm.class);
 	private FactFinder<Sprinkler> findSprinklers=new FactFinder<>(Sprinkler.class);
 	private FactFinder<RuleSetup> findRuleSetups = new FactFinder<>(RuleSetup.class);
 	private FactFinder<StandardRuleSetup> findStandardRuleSetups = new FactFinder<>(StandardRuleSetup.class);
+
+	private FactFinder<OrderLine> findOrderLineSetup = new FactFinder<>(OrderLine.class);
+	private FactFinder<Offer> findOfferObj=new FactFinder<>(Offer.class);
 
 	@Autowired
 	public DemoRuleServiceImpl(
@@ -122,7 +125,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	@Override
 	public void addRoom(DemoForm demoForm) {
 		HashMap<Integer, Integer> map = new HashMap<>();
-		
+
 		RuleSetup ruleSetup = new RuleSetup();
 		ruleSetup.setRuleNumber(demoForm.getRuleNumber());
 		ruleSetup.setRuleName(demoForm.getRuleName());
@@ -163,21 +166,21 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		offer.setFrieghtCharge(demoForm.getFrieghtCharge());
 
 		ruleSetup.setOffer(offer);
-		
+
 		ruleSetup.setDiscountRange1(demoForm.getDiscountRange1());
 		ruleSetup.setDiscountRange2(demoForm.getDiscountRange2());
 		ruleSetup.setQuantityRange1(demoForm.getQuantityRange1());
 		ruleSetup.setQuantityRange2(demoForm.getQuantityRange2());
-		
+
 		if(demoForm.getQuantityRange1()!=null && demoForm.getDiscountRange1()!=null) {
 			map.put(demoForm.getQuantityRange1(), demoForm.getDiscountRange1());
 		}
 		if(demoForm.getQuantityRange2()!=null && demoForm.getDiscountRange2()!=null) {
 			map.put(demoForm.getQuantityRange2(), demoForm.getDiscountRange2());
 		}
-		
+
 		ruleSetup.setMap(map);
-		
+
 		kieSession.insert(ruleSetup );
 		kieSession.insert(ruleSetup.getOffer());
 
@@ -185,14 +188,14 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		kieSession.insert( sprinkler );
 
 	}
-	
+
 	@Override
 	public void addStandardRule(DemoForm demoForm) {
 		HashMap<Integer, Integer> map = new HashMap<>();
 		StandardRuleSetup standardRuleSetup = new StandardRuleSetup();
 		standardRuleSetup.setRuleNumber(demoForm.getRuleNumber());
 		standardRuleSetup.setRuleName(demoForm.getRuleName());
-		
+
 		Account account = new Account();
 		if(demoForm.getAccountType().equals("")) {
 			account.setAccountType(null);
@@ -216,7 +219,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		standardRuleSetup.setQuantityRange2(demoForm.getQuantityRange2());
 		standardRuleSetup.setDiscountRange3(demoForm.getDiscountRange3());
 		standardRuleSetup.setQuantityRange3(demoForm.getQuantityRange3());
-		
+
 		if(demoForm.getQuantityRange1()!=null && demoForm.getDiscountRange1()!=null) {
 			map.put(demoForm.getQuantityRange1(), demoForm.getDiscountRange1());
 		}
@@ -226,9 +229,9 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 		if(demoForm.getQuantityRange3()!=null && demoForm.getDiscountRange3()!=null) {
 			map.put(demoForm.getQuantityRange3(), demoForm.getDiscountRange3());
 		}
-		
+
 		standardRuleSetup.setMap(map);
-		
+
 		Offer offer =new Offer();
 		offer.setComboField(demoForm.getCombo());
 		offer.setHardcode(demoForm.isHardcode());
@@ -293,41 +296,24 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	@Override	
 	public Collection<RuleSetup> generateOffer(DemoForm demoForm) {
 		loadPropFile();
-		
-		System.out.println("Bootstrapping the Rule Engine ..." );
-		kieSession.fireAllRules();
-		System.out.println("Rules fired: " + kieSession.fireAllRules());
-		
+		log.info("Rules fired: " + kieSession.fireAllRules());
+
 		Collection<RuleSetup> result = findRuleSetups.findFacts(kieSession);
 		List<RuleSetup> finalRule = new ArrayList<RuleSetup>();
-		
+
 		for(RuleSetup rule : result) {
 			if(rule.getIsQualified()) {
 				finalRule.add(rule);
-				System.out.println("Rules qualified: " + rule.getRuleName());
+				log.info("Rules qualified from generateOffer(): " + rule.getRuleName());
 			}
+			
+			rule.setIsQualified(false);
 		}
 		
-		System.out.println("Bootstrapping the Rule Engine ..." );
-		
+
 		return finalRule;
 	}
-	
-	public Collection<StandardRuleSetup> getStandardRulesQualified() {
-		Collection<StandardRuleSetup> standardRuleResult = findStandardRuleSetups.findFacts(kieSession);
-		List<StandardRuleSetup> standardRulesQualified = new ArrayList<StandardRuleSetup>();
-		
-		for(StandardRuleSetup rule : standardRuleResult) {
-			if(rule.getIsQualified()) {
-				standardRulesQualified.add(rule);
-				
-				System.out.println("Standard Rules qualified: " + rule.getRuleName());
-			}
-		}
-		
-		return standardRulesQualified;
-	}
-	
+
 	@Override
 	public Collection<OrderSprinkler> checkOrderSprinklers() {
 
@@ -335,7 +321,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 		return result;
 	}
-	
+
 	private void loadPropFile() {
 		//load dynamic prop file
 		List<RulePrecedence> rulePrecedences = RulePrecedenceBuilder.loadRulePrecedence();
@@ -347,30 +333,76 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	@Override
 	public Collection<StandardSprinkler> checkStandardSprinklers() {
 		Collection<StandardSprinkler> result = findStandardSprinkler.findFacts(kieSession);
-		
+
 		return result;
 	}
 
 	@Override	
 	public Collection<StandardRuleSetup> getStandardRulesQualified(DemoForm demoForm) {
-		loadPropFile();
-		
-		System.out.println("Bootstrapping the Rule Engine ..." );
-		kieSession.fireAllRules();
-		System.out.println("Rules fired: " + kieSession.fireAllRules());
-		
-		Collection<StandardRuleSetup> finalRule = findStandardRuleSetups.findFacts(kieSession);
-		
-		for(StandardRuleSetup rule : finalRule) {
+		List<StandardRuleSetup> stdRuleQualified = new ArrayList<StandardRuleSetup>();
+		log.info("Rules fired from getStandardRulesQualified(): " + kieSession.fireAllRules());
+
+		for(StandardRuleSetup rule : findStandardRuleSetups.findFacts(kieSession)) {
 			if(rule.getIsQualified()) {
-				finalRule.add(rule);
-				System.out.println("Rules qualified: " + rule.getRuleName());
+				stdRuleQualified.add(rule);
+
+				log.info("Standard Rules qualified: " + rule.getRuleName());
 			}
+			
+			rule.setIsQualified(false);
+		}
+
+		return stdRuleQualified;
+	}
+
+	@Override
+	public void delOrderSprinklers() {
+		Collection<OrderLine> orderLine = findOrderLineSetup.findFacts(kieSession);
+		Collection<OrderSprinkler> orderLineSprinkler = findOrderSprinklers.findFacts(kieSession);
+		
+		for(OrderLine o : orderLine) {
+			FactHandle factHandle = kieSession.getFactHandle(o);
+			kieSession.delete(factHandle);
+		}
+	
+		for(OrderSprinkler sprinkler : orderLineSprinkler) {
+			FactHandle factHandle = kieSession.getFactHandle(sprinkler);
+			kieSession.delete(factHandle);
+		}
+	}
+
+	@Override
+	public void disposeKiSession() {
+		Collection<OrderLine> orderLine = findOrderLineSetup.findFacts(kieSession);
+		Collection<OrderSprinkler> orderLineSprinkler = findOrderSprinklers.findFacts(kieSession);
+		Collection<RuleSetup> ruleObj = findRuleSetups.findFacts(kieSession);
+		Collection<Sprinkler> rulesprinkler = findSprinklers.findFacts(kieSession);
+		Collection<Offer> offers = findOfferObj.findFacts(kieSession);
+		
+		for(OrderLine o : orderLine) {
+			FactHandle factHandle = kieSession.getFactHandle(o);
+			kieSession.delete(factHandle);
 		}
 		
-		System.out.println("Bootstrapping the Rule Engine ..." );
+		for(OrderSprinkler sprinkler : orderLineSprinkler) {
+			FactHandle factHandle = kieSession.getFactHandle(sprinkler);
+			kieSession.delete(factHandle);
+		}
+
+		for(RuleSetup r : ruleObj) {
+			FactHandle factHandle = kieSession.getFactHandle(r);
+			kieSession.delete(factHandle);
+		}
 		
-		return finalRule;
+		for(Sprinkler rulesprinklerObj : rulesprinkler) {
+			FactHandle factHandle = kieSession.getFactHandle(rulesprinklerObj);
+			kieSession.delete(factHandle);
+		}
+
+		for(Offer oObj : offers) {
+			FactHandle factHandle = kieSession.getFactHandle(oObj);
+			kieSession.delete(factHandle);
+		}
 	}
 
 }

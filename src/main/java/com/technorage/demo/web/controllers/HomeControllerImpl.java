@@ -65,21 +65,28 @@ public class HomeControllerImpl implements HomeController {
 
 	@Override
 	public String generateOffer(DemoForm demoForm, Locale locale, Model model) {
-		logger.info("Generating Offer for order line: : " + demoForm.getOrderLineNumber());
 		List<String> priorityList = new ArrayList<String>();
 		List<RuleSetup> rulesQualified = new ArrayList<RuleSetup>();
+		
 		Collection<StandardRuleSetup> standardRulesQualified = ruleService.getStandardRulesQualified(null);
 		Collection<RuleSetup> ruleSetupList = ruleService.generateOffer(null);
-		Collection<OrderSprinkler> orderSprinklers = ruleService.checkOrderSprinklers();
-
+		
 		Integer maxPriority = 0;
 		Double totalDiscount = 0.0;
 		String winnerRules = "";
 		String terms = "";
-		String winner = " ";
+		String winner = "  ";
 		String qualifierList = " ";
-		boolean flag = false;
+		int discount = 0;
 		
+		//fetch order line quantity
+		int usedQty = 0;
+		Collection<OrderSprinkler> orderSprinklers = ruleService.checkOrderSprinklers();
+		for(OrderSprinkler lines : orderSprinklers) {
+			usedQty = lines.getOrderLine().getQuantity();
+		}
+		
+		//for case rule is qualified
 		for(RuleSetup ruleSetup : ruleSetupList) {
 			qualifierList = qualifierList + ", " + ruleSetup.getRuleName();
 			priorityList.add(ruleSetup.getWinningPriority());
@@ -89,42 +96,30 @@ public class HomeControllerImpl implements HomeController {
 				maxPriority = ruleSetup.getOffer().getPriority();
 			}
 			
-			if(!ruleSetup.getMap().isEmpty()) {
-				flag = true;
+			discount = getDiscountOnBasisOfQty(usedQty, ruleSetup.getMap());
+			if(discount == 0) {
+				//take discount from standard rule
+				for(StandardRuleSetup stdRule : standardRulesQualified) {
+					discount = getDiscountOnBasisOfQty(usedQty, stdRule.getMap());
+				}
 			}
+			
+			winner = "  " + ruleSetup.getRuleName() + " qualified with discount: " + discount + "%";
 
 		}
 
 		sortListOnBasisOfRule(rulesQualified);
-		int usedQty = 0;
-		int discount = 0;
-		
-		//Example Logic 10
-		
-		
-		
-		if(flag) {
-			for(OrderSprinkler lines : orderSprinklers) {
-				usedQty = lines.getOrderLine().getQuantity();
-				flag = true;
-			}
-			
-			for(RuleSetup setup : rulesQualified) {
+
+		// standard rule will execute only when none of account rules is qualified
+		if(rulesQualified.isEmpty()) {
+			for(StandardRuleSetup setup : standardRulesQualified) {
+				qualifierList = qualifierList + ", " + setup.getRuleName();
 				discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
-				winner = "  " + setup.getRuleName() + " qualified with discount: " + discount + "%";
-			}
-			
-			if(winner.equals(" ")) {
-				for(StandardRuleSetup setup : standardRulesQualified) {
-					discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
-					winner = "  " +  setup.getRuleName() + " qualified with discount: " + discount + "%";
-				}
+				winner = "  " +  setup.getRuleName() + " qualified with discount: " + discount + "%";
 			}
 		}
 		
-		
 		for(RuleSetup setup : rulesQualified) {
-
 			//Display winner with combo field parameters excluded
 			if(setup.getOffer().getComboField() == null) {
 				if(setup.getWinningPriority().equals("P1")) {
@@ -174,7 +169,7 @@ public class HomeControllerImpl implements HomeController {
 		model.addAttribute("standardSprinklers", standardSprinklers);
 
 		model.addAttribute("noOfAlarms", winner.substring(2));
-			
+
 		model.addAttribute("qualifiers", qualifierList.substring(2));
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 
@@ -201,8 +196,6 @@ public class HomeControllerImpl implements HomeController {
 	}
 
 	private String getIndex(Locale locale, Model model){
-		logger.info("Welcome to rules demo! The client locale is {}.", locale);
-
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		Collection<Alarm> alarms=ruleService.checkForFire();
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
@@ -226,7 +219,7 @@ public class HomeControllerImpl implements HomeController {
 	@Override
 	public String addRule(@ModelAttribute RuleSetupForm ruleSetupForm,Locale locale, Model model) {
 
-		System.out.println("Hell its Niraj");
+		System.out.println("Inside addRule method");
 		return null;
 	}
 
@@ -234,9 +227,9 @@ public class HomeControllerImpl implements HomeController {
 	public String addStandardRule(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Adding Standard Rule: " + demoForm.getRuleName());
 		ruleService.addStandardRule(demoForm);
-		rooms.put(demoForm.getRuleName(), demoForm.getRuleName());
 
 		return getIndex(locale, model);
+
 	}
 
 	private static void sortListOnBasisOfRule(List<RuleSetup> rulesQualified) {
@@ -256,5 +249,30 @@ public class HomeControllerImpl implements HomeController {
 
 		return 0;
 	}
+	
+	@Override
+	public String deleteOrder(DemoForm demoForm, Locale locale, Model model) {
+		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
+		model.addAttribute("sprinklers", sprinklers);
+		ruleService.delOrderSprinklers();
+		model.addAttribute("orderSprinklers", null);
+		
+		model.addAttribute("noOfAlarms", "OrderLine Deleted");
+		
+		return ("index");
+	}
+	
+	@Override
+	public String deleteRuleSet(DemoForm demoForm, Locale locale, Model model) {
+		ruleService.disposeKiSession();
+
+		model.addAttribute("sprinklers", null);
+	    model.addAttribute("orderSprinklers", null);
+	    model.addAttribute("standardSprinklers", null);
+	    
+		model.addAttribute("noOfAlarms", "Data reset successful!");
+		return ("index");
+	}
+	
 
 }

@@ -2,6 +2,7 @@ package business.rules;
 
 import com.technorage.demo.facts.OrderLine;
 import com.technorage.demo.facts.RuleSetup;
+import com.technorage.demo.facts.StandardRuleSetup;
 import java.util.*;
 
 rule "Rule if Account Number, Product Group Code and Product ISBN Match"
@@ -10,7 +11,7 @@ rule "Rule if Account Number, Product Group Code and Product ISBN Match"
        	$line: OrderLine()  
        	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber ,
        		product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
-       		product.isbn!=null, product.isbn == $line.product.isbn )
+       		product.familyCode == null, product.isbn!=null, product.isbn == $line.product.isbn )
        	
    then  
      	modify($r){
@@ -24,7 +25,8 @@ rule "Rule if Account Number and Product Group Code match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
-       		product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode), product.isbn == null)
+       		product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode), 
+       		product.familyCode == null, product.isbn == null)
        	
    then  
      	modify($r){
@@ -38,7 +40,7 @@ rule "Rule if Account Number and Product ISBN match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
-       		product.productGroupCode == null, product.isbn!=null, product.isbn == $line.product.isbn )
+       		product.productGroupCode == null, product.familyCode == null, product.isbn!=null, product.isbn == $line.product.isbn )
        	
    then  
      	modify($r){
@@ -52,7 +54,7 @@ rule "Rule if Product Group Code and Product ISBN match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
-       		account.accountNumber == null, product.isbn!=null, product.isbn == $line.product.isbn)
+       		account.accountNumber == null, product.familyCode == null, product.isbn!=null, product.isbn == $line.product.isbn)
        	
    then  
      	modify($r){
@@ -66,7 +68,7 @@ rule "Rule if Product Group Code match"
    when  
        	$line: OrderLine()  
        	$r: RuleSetup(product.productGroupCode!=null, product.productGroupCode.equals($line.product.productGroupCode),
-       		account.accountNumber == null, product.isbn == null )
+       		account.accountNumber == null, product.familyCode == null, product.isbn == null )
        	
    then  
      	modify($r){
@@ -80,7 +82,7 @@ rule "Rule if Product ISBN match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(product.isbn!=null, product.isbn == $line.product.isbn, 
-       		account.accountNumber == null, product.productGroupCode == null )
+       		account.accountNumber == null, product.familyCode == null, product.productGroupCode == null )
        	
    then 
    		modify($r){
@@ -94,7 +96,7 @@ rule "Rule if Account Type match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(account.accountType!=null, account.accountType.equals($line.account.accountType),
-       	product.isbn == null)
+       	product.familyCode == null, product.isbn == null)
        	
    then 
    		modify($r){
@@ -107,7 +109,7 @@ rule "Rule if Account Type and Product ISBN match"
     when  
        	$line: OrderLine()  
        	$r: RuleSetup(account.accountType!=null, account.accountType.equals($line.account.accountType),
-       		product.isbn!=null, product.isbn == $line.product.isbn )
+       		product.isbn!=null, product.isbn == $line.product.isbn, product.familyCode == null  )
        	
    then  
      	modify($r){
@@ -121,11 +123,38 @@ rule "Rule if Account Number match"
     when  
        	$line: OrderLine() 
        	$r: RuleSetup(account.accountNumber!=null, account.accountNumber == $line.account.accountNumber,
-       		product.productGroupCode == null, product.isbn == null )
+       		product.familyCode == null, product.productGroupCode == null, product.isbn == null )
 
    then  
      	modify($r){
      		setIsQualified(true);
      	}
+end
+
+rule "Rule if Account Number and Family Code Match"
+    no-loop
+    when  
+       	$o: OrderLine()  
+       	$r: RuleSetup(!isQualified, account.accountNumber == $o.account.accountNumber, product.familyCode.equals($o.product.familyCode))
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
+end
+
+rule "Standard Rule if family code match"
+    salience -10
+    no-loop
+    when  
+       	$o: OrderLine()  
+       	$r: StandardRuleSetup(!isQualified, product.familyCode.equals($o.product.familyCode) )
+       	
+   then  
+     	modify($r){
+     		setIsQualified(true);
+     	}
+     
 end
 

@@ -37,5 +37,10 @@ public interface HomeController {
     @RequestMapping(value="/addStandardRule", method=RequestMethod.POST)
 	String addStandardRule(DemoForm demoForm, Locale locale, Model model);
 
+    @RequestMapping(value="/deleteOrder", method=RequestMethod.POST)
+    public String deleteOrder(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
+    
+    @RequestMapping(value="/deleteRuleSet", method=RequestMethod.POST)
+    public String deleteRuleSet(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
     
 }

@@ -15,12 +15,7 @@
 <!-- Optional theme -->
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+
 </head>
 <body role="document">
 	<!-- Fixed navbar -->
@@ -54,9 +49,7 @@
 		<div class="page-header">
 			<h2>HBG Discounting Application</h2>
 		</div>
-		<h3>
-			<!-- The below demo shows if there is any fire in the configured rooms -->
-		</h3>
+
 		<c:if test="${isError ==true}">
 			<div class="alert alert-danger" role="alert">
 				Oh snap!
@@ -69,21 +62,26 @@
 					Rules qualified: <strong><c:out value="${qualifiers}" /></strong>
 				</div>
 			</c:when>
-			
 		</c:choose>
 		
 		<c:choose>
 			<c:when test="${!noOfAlarms.equals(' ')}">
 				<div class="alert alert-success" role="alert">
-					Winner is Rule: <strong><c:out value="${noOfAlarms}" /></strong>
+					Output: <strong><c:out value="${noOfAlarms}" /></strong>
 				</div>
 			</c:when>
-			
 		</c:choose>
 
-		<h3>
-			<span class="label label-default">The time on the server is ${serverTime}.</span>
-		</h3>
+		<th>
+			<form:form method="POST" action="deleteRuleSet"
+				commandName="demoForm">
+				<div class="input-group">
+					<span class="input-group-btn"> <input
+						class="btn btn-success" type="submit" value="Reset All" />
+					</span>
+				</div>
+			</form:form>
+		</th>
 
 		<!-- RULE SETUP SECTION-->
 		<div class="page-header">
@@ -336,13 +334,23 @@
 									<th>DGP</th>
 									<th>Isbn</th>
 									<th>Quantity</th>
+									<th>
+										<form:form method="POST" action="generateOffer"
+											commandName="demoForm">
+											<div class="input-group">
+												<span class="input-group-btn"> <input
+													class="btn btn-success" type="submit" value="Generate Offer" />
+												</span>
+											</div>
+										</form:form>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
 								<c:forEach var="orderSprinkler" varStatus="item"
 									items="${orderSprinklers}">
 									<tr>
-										<form:form method="POST" action="generateOffer" commandName="demoForm">
+										<form:form method="POST" action="deleteOrder" commandName="demoForm">
 											<td>${orderSprinkler.orderLine.orderLineId}</td>
 											<td>${orderSprinkler.orderLine.account.accountNumber}</td>
 											<td>${orderSprinkler.orderLine.account.accountType}</td>
@@ -350,7 +358,7 @@
 											<td>${orderSprinkler.orderLine.product.productGroupCode}</td>
 											<td>${orderSprinkler.orderLine.product.isbn}</td>
 											<td>${orderSprinkler.orderLine.quantity}</td>
-											<td><span class="input-group-btn"> <input class="btn btn-success" type="submit" value="Generate Offer" />
+											<td><span class="input-group-btn"> <input class="btn btn-success" type="submit" value="Delete Order" />
 											</span></td>
 										</form:form>
 									</tr>
