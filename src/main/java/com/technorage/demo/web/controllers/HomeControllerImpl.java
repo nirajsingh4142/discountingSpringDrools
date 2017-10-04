@@ -48,9 +48,9 @@ public class HomeControllerImpl implements HomeController {
 
 	@Override
 	public String addRoom(DemoForm demoForm, Locale locale, Model model) {
-		logger.info("Adding room: " + demoForm.getRoomName());
+		logger.info("Adding rule: " + demoForm.getRuleName());
 		ruleService.addRoom(demoForm);
-		rooms.put(demoForm.getRoomName(), demoForm.getRoomName());
+		rooms.put(demoForm.getRoomName(), demoForm.getRuleName());
 
 		return getIndex(locale, model);
 	}
@@ -75,7 +75,7 @@ public class HomeControllerImpl implements HomeController {
 		Double totalDiscount = 0.0;
 		String winnerRules = "";
 		String terms = "";
-		String winner = "  ";
+		String winner = " ";
 		String qualifierList = " ";
 		int discount = 0;
 		
@@ -104,7 +104,7 @@ public class HomeControllerImpl implements HomeController {
 				}
 			}
 			
-			winner = "  " + ruleSetup.getRuleName() + " qualified with discount: " + discount + "%";
+			winner = "  " + ruleSetup.getRuleName() + " wins with discount: " + discount + "%";
 
 		}
 
@@ -115,7 +115,7 @@ public class HomeControllerImpl implements HomeController {
 			for(StandardRuleSetup setup : standardRulesQualified) {
 				qualifierList = qualifierList + ", " + setup.getRuleName();
 				discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
-				winner = "  " +  setup.getRuleName() + " qualified with discount: " + discount + "%";
+				winner = "  " +  setup.getRuleName() + " wins with discount: " + discount + "%";
 			}
 		}
 		
@@ -167,10 +167,14 @@ public class HomeControllerImpl implements HomeController {
 		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
 		model.addAttribute("standardSprinklers", standardSprinklers);
-
-		model.addAttribute("noOfAlarms", winner.substring(2));
-
-		model.addAttribute("qualifiers", qualifierList.substring(2));
+	
+		if(!winner.equals(" ")) {
+			model.addAttribute("noOfAlarms", winner.substring(2));
+		}
+		if(!qualifierList.equals(" ")) {
+			model.addAttribute("qualifiers", qualifierList.substring(2));
+		}
+		
 		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 
 		return ("index");
@@ -256,8 +260,9 @@ public class HomeControllerImpl implements HomeController {
 		model.addAttribute("sprinklers", sprinklers);
 		ruleService.delOrderSprinklers();
 		model.addAttribute("orderSprinklers", null);
+		model.addAttribute("noOfAlarms", "Order line deleted");
 		
-		model.addAttribute("noOfAlarms", "OrderLine Deleted");
+		logger.info("Order line deleted: " + demoForm.getOrderLineNumber());
 		
 		return ("index");
 	}
