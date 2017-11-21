@@ -1,7 +1,6 @@
 package business.rules;
 
 import com.technorage.demo.facts.RuleSetup;
-import com.technorage.demo.facts.RulePrecedence;
 
 /*
 rule "Decide Winning Rule"
@@ -34,32 +33,6 @@ rule "Define priority P2 on basis of hardcode flag"
 		modify($r){
 			setWinningPriority("P2");
 		}
-end
-
-rule "Assign prioriy flag on basis of overriden flag"
-	no-loop
-	enabled($r.winningPriority == "")
-	when
-		$rulePrecedence: RulePrecedence()
-		$r: RuleSetup(isQualified, offer.overridenExplicitly, $rulePrecedence.ruleName.equals("overridenExplicitlyFlag"))
-	then
-		modify($r){
-			setWinningPriority($rulePrecedence.getPriority());
-		}
-			
-end
-
-rule "Assign prioriy flag on basis of hardcode flag"
-	no-loop
-	enabled($r.winningPriority == "")
-	when
-		$rulePrecedence: RulePrecedence()
-		$r: RuleSetup(isQualified, offer.hardcode, $rulePrecedence.ruleName.equals("hardcodeFlag"))
-	then
-		modify($r){
-			setWinningPriority($rulePrecedence.getPriority());
-		}
-			
 end
 
 rule "Decide winner on basis of combo field"

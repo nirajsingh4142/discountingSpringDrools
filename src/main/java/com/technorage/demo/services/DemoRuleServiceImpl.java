@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.kie.api.runtime.rule.FactHandle;
 import org.slf4j.Logger;
@@ -27,13 +26,10 @@ import com.technorage.demo.drools.spring.KieSessionBean;
 import com.technorage.demo.facts.Account;
 import com.technorage.demo.facts.Alarm;
 import com.technorage.demo.facts.Discount;
-import com.technorage.demo.facts.Fire;
 import com.technorage.demo.facts.Offer;
 import com.technorage.demo.facts.OrderLine;
 import com.technorage.demo.facts.OrderSprinkler;
 import com.technorage.demo.facts.Product;
-import com.technorage.demo.facts.Room;
-import com.technorage.demo.facts.RulePrecedence;
 import com.technorage.demo.facts.RuleSetup;
 import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.facts.StandardRuleSetup;
@@ -44,20 +40,13 @@ import com.technorage.demo.forms.DemoForm;
 @Scope(value=ConfigurableBeanFactory.SCOPE_SINGLETON, proxyMode=ScopedProxyMode.INTERFACES)
 public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4279066046268640811L;
-
 	private static Logger log = LoggerFactory.getLogger(DemoRuleServiceImpl.class);
 
 	public KieSessionBean kieSession;
-
 	private TrackingAgendaEventListener agendaEventListener;
 	private TrackingWorkingMemoryEventListener workingMemoryEventListener;
 
-	private Map<String,Room> name2room = new HashMap<String,Room>();
-	private Map<String,FactHandle> fact2fire = new HashMap<String,FactHandle>();
 	private FactFinder<OrderSprinkler> findOrderSprinklers=new FactFinder<>(OrderSprinkler.class);
 	private FactFinder<StandardSprinkler> findStandardSprinkler=new FactFinder<>(StandardSprinkler.class);
 
@@ -84,46 +73,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	}
 
 	@Override
-	public Collection<Alarm> addFire(String[]  fires) {
-
-		for( String fire: fires ){
-
-			if(!fact2fire.containsKey(fire)){
-				Fire roomFire = new Fire( name2room.get(fire) );
-				FactHandle roomFireHandle = kieSession.insert( roomFire );
-				fact2fire.put( fire, roomFireHandle );
-			}
-
-		}
-
-		kieSession.fireAllRules();
-		//  Collection<T> result = findFact.findFacts(kieSession, new BeanPropertyFilter("key", ""));     
-
-		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-
-		return result;
-	}
-
-	@Override
-	public Collection<Alarm> remFire(String[]  fires) {
-
-		for( String fire: fires ){
-			if(fact2fire.containsKey(fire)){
-				kieSession.delete( fact2fire.get(fire) );
-				fact2fire.remove( fire );
-			}
-		}
-
-
-		kieSession.fireAllRules();
-
-		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-
-		return result;
-	}
-
-	@Override
-	public void addRoom(DemoForm demoForm) {
+	public void addRule(DemoForm demoForm) {
 		HashMap<Integer, Integer> map = new HashMap<>();
 
 		RuleSetup ruleSetup = new RuleSetup();
@@ -250,25 +200,14 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	@Override
 	public Collection<Alarm> checkForFire() {
-
-		Collection<Alarm> result = findAlarms.findFacts(kieSession);
-
-		return result;
+		return findAlarms.findFacts(kieSession);
 	}
 
 	@Override
 	public Collection<Sprinkler> checkSprinklers() {
-
-		Collection<Sprinkler> result = findSprinklers.findFacts(kieSession);
-
-		return result;
+		return findSprinklers.findFacts(kieSession);
 	}
 
-	@Override
-	public Room getRoom(String name) {
-
-		return name2room.get(name);
-	}
 
 	@Override
 	public void addOrder(DemoForm demoForm) {
@@ -295,7 +234,6 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 	@Override	
 	public Collection<RuleSetup> generateOffer(DemoForm demoForm) {
-		loadPropFile();
 		log.info("Rules fired: " + kieSession.fireAllRules());
 
 		Collection<RuleSetup> result = findRuleSetups.findFacts(kieSession);
@@ -306,35 +244,20 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 				finalRule.add(rule);
 				log.info("Rules qualified from generateOffer(): " + rule.getRuleName());
 			}
-			
 			rule.setIsQualified(false);
 		}
-		
 
 		return finalRule;
 	}
 
 	@Override
-	public Collection<OrderSprinkler> checkOrderSprinklers() {
-
-		Collection<OrderSprinkler> result = findOrderSprinklers.findFacts(kieSession);
-
-		return result;
-	}
-
-	private void loadPropFile() {
-		//load dynamic prop file
-		List<RulePrecedence> rulePrecedences = RulePrecedenceBuilder.loadRulePrecedence();
-		for(RulePrecedence precedences : rulePrecedences) {
-			kieSession.insert(precedences);
-		}
+	public Collection<OrderSprinkler> checkOrderLines() {
+		return findOrderSprinklers.findFacts(kieSession);
 	}
 
 	@Override
 	public Collection<StandardSprinkler> checkStandardSprinklers() {
-		Collection<StandardSprinkler> result = findStandardSprinkler.findFacts(kieSession);
-
-		return result;
+		return findStandardSprinkler.findFacts(kieSession);
 	}
 
 	@Override	

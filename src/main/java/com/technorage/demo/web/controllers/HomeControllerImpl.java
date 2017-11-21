@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.technorage.demo.facts.Alarm;
 import com.technorage.demo.facts.OrderSprinkler;
@@ -25,32 +24,27 @@ import com.technorage.demo.facts.Sprinkler;
 import com.technorage.demo.facts.StandardRuleSetup;
 import com.technorage.demo.facts.StandardSprinkler;
 import com.technorage.demo.forms.DemoForm;
-import com.technorage.demo.forms.RuleSetupForm;
 import com.technorage.demo.services.DemoRuleService;
-import com.technorage.demo.utils.DateUtils;
 
 @Controller
 public class HomeControllerImpl implements HomeController {
 
 	private static Logger logger = LoggerFactory.getLogger(HomeControllerImpl.class);
-
+	private Map<String, String> rooms = new LinkedHashMap<String,String>();
+	
 	@Autowired
 	private DemoRuleService<?> ruleService;
 
-	private Map<String, String> rooms = new LinkedHashMap<String,String>();
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
 	@Override
 	public String index(Locale locale, Model model) {
 		return getIndex(locale, model);
 	}
 
 	@Override
-	public String addRoom(DemoForm demoForm, Locale locale, Model model) {
+	public String addRule(DemoForm demoForm, Locale locale, Model model) {
 		logger.info("Adding rule: " + demoForm.getRuleName());
-		ruleService.addRoom(demoForm);
-		rooms.put(demoForm.getRoomName(), demoForm.getRuleName());
+		ruleService.addRule(demoForm);
+		rooms.put(demoForm.getRuleName(), demoForm.getRuleName());
 
 		return getIndex(locale, model);
 	}
@@ -65,46 +59,46 @@ public class HomeControllerImpl implements HomeController {
 
 	@Override
 	public String generateOffer(DemoForm demoForm, Locale locale, Model model) {
-		List<String> priorityList = new ArrayList<String>();
 		List<RuleSetup> rulesQualified = new ArrayList<RuleSetup>();
 		
 		Collection<StandardRuleSetup> standardRulesQualified = ruleService.getStandardRulesQualified(null);
 		Collection<RuleSetup> ruleSetupList = ruleService.generateOffer(null);
 		
-		Integer maxPriority = 0;
-		Double totalDiscount = 0.0;
-		String winnerRules = "";
-		String terms = "";
-		String winner = " ";
-		String qualifierList = " ";
-		int discount = 0;
+		Double netDiscount = 0.0;
+		String displayWinnerRule = "";
+		String displayWinnerTerms = "";
+		String resultString = " ";
+		String displayQualifierRule = " ";
+		int tempDiscount = 0;
 		
 		//fetch order line quantity
-		int usedQty = 0;
-		Collection<OrderSprinkler> orderSprinklers = ruleService.checkOrderSprinklers();
-		for(OrderSprinkler lines : orderSprinklers) {
-			usedQty = lines.getOrderLine().getQuantity();
+		int usedQuantity = 0;
+		Collection<OrderSprinkler> orderLines = ruleService.checkOrderLines();
+		for(OrderSprinkler lines : orderLines) {
+			usedQuantity = lines.getOrderLine().getQuantity();
 		}
 		
 		//for case rule is qualified
 		for(RuleSetup ruleSetup : ruleSetupList) {
-			qualifierList = qualifierList + ", " + ruleSetup.getRuleName();
-			priorityList.add(ruleSetup.getWinningPriority());
+			displayQualifierRule = displayQualifierRule + ", " + ruleSetup.getRuleName();
 			rulesQualified.add(ruleSetup);
 
-			if(ruleSetup.getOffer().getPriority() !=null && ruleSetup.getOffer().getPriority() > maxPriority) {
-				maxPriority = ruleSetup.getOffer().getPriority();
-			}
-			
-			discount = getDiscountOnBasisOfQty(usedQty, ruleSetup.getMap());
-			if(discount == 0) {
-				//take discount from standard rule
-				for(StandardRuleSetup stdRule : standardRulesQualified) {
-					discount = getDiscountOnBasisOfQty(usedQty, stdRule.getMap());
+			tempDiscount = getDiscountOnBasisOfQty(usedQuantity, ruleSetup.getMap());
+			if(tempDiscount == 0) {
+				
+				//case no standard rule exists
+				if(ruleSetup.getDiscount()!=null && ruleSetup.getDiscount().getPercentage()!=null) {
+					tempDiscount = ruleSetup.getDiscount().getPercentage().intValue();
 				}
+
+				//take discount from standard rule if exists
+				for(StandardRuleSetup stdRule : standardRulesQualified) {
+					tempDiscount = getDiscountOnBasisOfQty(usedQuantity, stdRule.getMap());
+				}
+				
 			}
 			
-			winner = "  " + ruleSetup.getRuleName() + " wins with discount: " + discount + "%";
+			resultString = "  " + ruleSetup.getRuleName() + " wins with discount: " + tempDiscount + "%";
 
 		}
 
@@ -113,118 +107,70 @@ public class HomeControllerImpl implements HomeController {
 		// standard rule will execute only when none of account rules is qualified
 		if(rulesQualified.isEmpty()) {
 			for(StandardRuleSetup setup : standardRulesQualified) {
-				qualifierList = qualifierList + ", " + setup.getRuleName();
-				discount = getDiscountOnBasisOfQty(usedQty, setup.getMap());
-				winner = "  " +  setup.getRuleName() + " wins with discount: " + discount + "%";
+				displayQualifierRule = displayQualifierRule + ", " + setup.getRuleName();
+				tempDiscount = getDiscountOnBasisOfQty(usedQuantity, setup.getMap());
+				resultString = "  " +  setup.getRuleName() + " wins with discount: " + tempDiscount + "%";
 			}
 		}
 		
 		for(RuleSetup setup : rulesQualified) {
-			//Display winner with combo field parameters excluded
-			if(setup.getOffer().getComboField() == null) {
-				if(setup.getWinningPriority().equals("P1")) {
-					winner = winner + ", " + setup.getRuleName();
-					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
-					break;
-
-				} else if(!priorityList.contains("P1") && setup.getWinningPriority().equals("P2")) {
-					winner = winner + ", " + setup.getRuleName();
-					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
-					break;
-
-				} else if(setup.getOffer().getPriority() == maxPriority) {
-					winner = winner + ", " + setup.getRuleName();
-					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
-					break;
-				} 
-			} 
-
 			//Display winner with combo field parameters included
-			else if(setup.getIsWinner()) {
+			if(setup.getIsWinner()) {
 				if(setup.getDiscount()!=null && setup.getDiscount().getPercentage()!=null) {
-					winner = winner + ", " + setup.getRuleName();
-					totalDiscount = totalDiscount + setup.getDiscount().getPercentage();
-					winnerRules = winnerRules + ", " + setup.getRuleNumber();
+					resultString = resultString + ", " + setup.getRuleName();
+					netDiscount = netDiscount + setup.getDiscount().getPercentage();
+					displayWinnerRule = displayWinnerRule + ", " + setup.getRuleNumber();
 				}
 
 				if(setup.getOffer().getDays() != null) {
-					terms = " and Term " + setup.getOffer().getDays() + " days from Rule " + setup.getRuleNumber();
+					displayWinnerTerms = " and Term " + setup.getOffer().getDays() + " days from Rule " + setup.getRuleNumber();
 				}
+				//if freight charge is false, it is free freight 
 				if(setup.getOffer().getFrieghtCharge().equalsIgnoreCase("false")) {
-					terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
+					displayWinnerTerms = "\n" + displayWinnerTerms + "\n having free freight from Rule " + setup.getRuleNumber();
 				}
 			}
 
 		}
 
-		if(!winnerRules.isEmpty()) {
-			winner = "  Rule " + winnerRules.substring(2) + " wins with discount: " + totalDiscount + "%" + terms;
+		if(!displayWinnerRule.isEmpty()) {
+			resultString = "  Rule " + displayWinnerRule.substring(2) + " wins with discount: " + netDiscount + "%" + displayWinnerTerms;
 		}
 
 		Collection<Sprinkler> sprinklers = ruleService.checkSprinklers();
 		Collection<StandardSprinkler> standardSprinklers=ruleService.checkStandardSprinklers();
 
 		model.addAttribute("sprinklers", sprinklers);
-		model.addAttribute("orderSprinklers", orderSprinklers);
+		model.addAttribute("orderSprinklers", orderLines);
 		model.addAttribute("standardSprinklers", standardSprinklers);
 	
-		if(!winner.equals(" ")) {
-			model.addAttribute("noOfAlarms", winner.substring(2));
+		if(!resultString.equals(" ")) {
+			model.addAttribute("netOutput", resultString.substring(2));
 		}
-		if(!qualifierList.equals(" ")) {
-			model.addAttribute("qualifiers", qualifierList.substring(2));
+		if(!displayQualifierRule.equals(" ")) {
+			model.addAttribute("qualifiers", displayQualifierRule.substring(2));
 		}
 		
-		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
-
 		return ("index");
 	}
 
-	@Override
-	public String addFire(DemoForm demoForm,Locale locale, Model model) {
-		if(demoForm.getFireRoomName()!=null && !demoForm.getFireRoomName().isEmpty()){
-			logger.info("Adding fire: " + demoForm.getFireRoomName());
-			String[] fires = new String[]{demoForm.getFireRoomName()};
-			ruleService.addFire(fires);
-		}
-		return getIndex(locale, model);
-	}
-	@Override
-	public String remFire(DemoForm demoForm,Locale locale, Model model) {
-		if(demoForm.getFireRoomName()!=null && !demoForm.getFireRoomName().isEmpty()){
-			logger.info("Removing fire: " + demoForm.getFireRoomName());
-			String[] fires = new String[]{demoForm.getFireRoomName()};
-			ruleService.remFire(fires);
-		}
-		return getIndex(locale, model);
-	}
-
 	private String getIndex(Locale locale, Model model){
-		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		Collection<Alarm> alarms=ruleService.checkForFire();
 		Collection<Sprinkler> sprinklers=ruleService.checkSprinklers();
-		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderSprinklers();
+		Collection<OrderSprinkler> orderSprinklers=ruleService.checkOrderLines();
 
 		Collection<StandardSprinkler> standardSprinklers=ruleService.checkStandardSprinklers();
 		model.addAttribute("alarmsFound", alarms!=null && alarms.size()!=0? true:false );
-		model.addAttribute("noOfAlarms", alarms.size());
+		model.addAttribute("netOutput", alarms.size());
 		model.addAttribute("qualifiers", alarms.size());
 		model.addAttribute("alarms", alarms);
 		model.addAttribute("sprinklers", sprinklers);
 		model.addAttribute("orderSprinklers", orderSprinklers);
 		model.addAttribute("standardSprinklers", standardSprinklers);
-		model.addAttribute("serverTime", DateUtils.getFormattedDate(locale) );
 		model.addAttribute("rooms", rooms);
 		model.addAttribute("demoForm", new DemoForm());
 
 		return "index";
-	}
-
-	@Override
-	public String addRule(@ModelAttribute RuleSetupForm ruleSetupForm,Locale locale, Model model) {
-
-		System.out.println("Inside addRule method");
-		return null;
 	}
 
 	@Override
@@ -260,7 +206,7 @@ public class HomeControllerImpl implements HomeController {
 		model.addAttribute("sprinklers", sprinklers);
 		ruleService.delOrderSprinklers();
 		model.addAttribute("orderSprinklers", null);
-		model.addAttribute("noOfAlarms", "Order line deleted");
+		model.addAttribute("netOutput", "Order line deleted");
 		
 		logger.info("Order line deleted: " + demoForm.getOrderLineNumber());
 		
@@ -275,7 +221,7 @@ public class HomeControllerImpl implements HomeController {
 	    model.addAttribute("orderSprinklers", null);
 	    model.addAttribute("standardSprinklers", null);
 	    
-		model.addAttribute("noOfAlarms", "Data reset successful!");
+		model.addAttribute("netOutput", "Data reset successful!");
 		return ("index");
 	}
 	

@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Demo-Home</title>
+<title>HBG Discounting</title>
 
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet"
@@ -15,29 +15,18 @@
 <!-- Optional theme -->
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-
 </head>
+
 <body role="document">
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed"
-					data-toggle="collapse" data-target=".navbar-collapse">
-					<span class="sr-only">Toggle navigation</span> <span
-						class="icon-bar"></span> <span class="icon-bar"></span> <span
-						class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">OTC Discounting App</a>
-
-			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">Home</a></li>
 
 				</ul>
 			</div>
-			<!--/.nav-collapse -->
 		</div>
 	</div>
 	<div class="container theme-showcase" role="main">
@@ -50,12 +39,6 @@
 			<h2>HBG Discounting Application</h2>
 		</div>
 
-		<c:if test="${isError ==true}">
-			<div class="alert alert-danger" role="alert">
-				Oh snap!
-				<c:out value="${error}" />
-			</div>
-		</c:if>
 		<c:choose>
 			<c:when test="${!qualifiers.equals(' ')}">
 				<div class="alert alert-success" role="alert">
@@ -65,9 +48,9 @@
 		</c:choose>
 		
 		<c:choose>
-			<c:when test="${!noOfAlarms.equals(' ')}">
+			<c:when test="${!netOutput.equals(' ')}">
 				<div class="alert alert-success" role="alert">
-					Output: <strong><c:out value="${noOfAlarms}" /></strong>
+					Output: <strong><c:out value="${netOutput}" /></strong>
 				</div>
 			</c:when>
 		</c:choose>
@@ -89,7 +72,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-6">
-				<form:form method="POST" action="addroom" commandName="demoForm">
+				<form:form method="POST" action="addRule" commandName="demoForm">
 					<div class="input-group">
 						<form:input path="ruleNumber" id="ruleNumber-input"
 							placeholder="Type rule number" class="form-control" />
