@@ -98,10 +98,17 @@ public class HomeControllerImpl implements HomeController {
 			
 			discount = getDiscountOnBasisOfQty(usedQty, ruleSetup.getMap());
 			if(discount == 0) {
-				//take discount from standard rule
+				
+				//case no standard rule exists
+				if(ruleSetup.getDiscount()!=null && ruleSetup.getDiscount().getPercentage()!=null) {
+					discount = ruleSetup.getDiscount().getPercentage().intValue();
+				}
+
+				//take discount from standard rule if exists
 				for(StandardRuleSetup stdRule : standardRulesQualified) {
 					discount = getDiscountOnBasisOfQty(usedQty, stdRule.getMap());
 				}
+				
 			}
 			
 			winner = "  " + ruleSetup.getRuleName() + " wins with discount: " + discount + "%";
@@ -122,7 +129,7 @@ public class HomeControllerImpl implements HomeController {
 		for(RuleSetup setup : rulesQualified) {
 			//Display winner with combo field parameters excluded
 			if(setup.getOffer().getComboField() == null) {
-				if(setup.getWinningPriority().equals("P1")) {
+				/*if(setup.getWinningPriority().equals("P1")) {
 					winner = winner + ", " + setup.getRuleName();
 					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
 					break;
@@ -136,7 +143,7 @@ public class HomeControllerImpl implements HomeController {
 					winner = winner + ", " + setup.getRuleName();
 					System.out.println("Rule " + setup.getRuleNumber() + " wins with discount: " + setup.getDiscount().getPercentage() + "%");
 					break;
-				} 
+				} */
 			} 
 
 			//Display winner with combo field parameters included
@@ -150,6 +157,7 @@ public class HomeControllerImpl implements HomeController {
 				if(setup.getOffer().getDays() != null) {
 					terms = " and Term " + setup.getOffer().getDays() + " days from Rule " + setup.getRuleNumber();
 				}
+				//if freight charge is false, it is free freight 
 				if(setup.getOffer().getFrieghtCharge().equalsIgnoreCase("false")) {
 					terms = "\n" + terms + "\n having free freight from Rule " + setup.getRuleNumber();
 				}
