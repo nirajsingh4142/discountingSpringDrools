@@ -131,7 +131,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 
 		ruleSetup.setMap(map);
 
-		kieSession.insert(ruleSetup );
+		kieSession.insert(ruleSetup);
 		kieSession.insert(ruleSetup.getOffer());
 
 		Sprinkler sprinkler = new Sprinkler( ruleSetup );
@@ -235,11 +235,9 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	@Override	
 	public Collection<RuleSetup> generateOffer(DemoForm demoForm) {
 		log.info("Rules fired: " + kieSession.fireAllRules());
-
-		Collection<RuleSetup> result = findRuleSetups.findFacts(kieSession);
 		List<RuleSetup> finalRule = new ArrayList<RuleSetup>();
 
-		for(RuleSetup rule : result) {
+		for(RuleSetup rule : findRuleSetups.findFacts(kieSession)) {
 			if(rule.getIsQualified()) {
 				finalRule.add(rule);
 				log.info("Rules qualified from generateOffer(): " + rule.getRuleName());
@@ -251,7 +249,7 @@ public class DemoRuleServiceImpl<T> implements DemoRuleService<T>, Serializable 
 	}
 
 	@Override
-	public Collection<OrderSprinkler> checkOrderLines() {
+	public Collection<OrderSprinkler> getOrderLines() {
 		return findOrderSprinklers.findFacts(kieSession);
 	}
 

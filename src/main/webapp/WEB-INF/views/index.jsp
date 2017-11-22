@@ -46,7 +46,7 @@
 				</div>
 			</c:when>
 		</c:choose>
-		
+
 		<c:choose>
 			<c:when test="${!netOutput.equals(' ')}">
 				<div class="alert alert-success" role="alert">
@@ -55,16 +55,22 @@
 			</c:when>
 		</c:choose>
 
-		<th>
-			<form:form method="POST" action="deleteRuleSet"
+		<th><form:form method="POST" action="deleteRuleSet"
 				commandName="demoForm">
 				<div class="input-group">
 					<span class="input-group-btn"> <input
 						class="btn btn-success" type="submit" value="Reset All" />
 					</span>
 				</div>
-			</form:form>
-		</th>
+			</form:form></th>
+		<th><form:form method="POST" action="exportRuleData"
+				commandName="demoForm">
+				<div class="input-group">
+					<span class="input-group-btn"> <input
+						class="btn btn-success" type="submit" value="Export Rules" />
+					</span>
+				</div>
+			</form:form></th>
 
 		<!-- RULE SETUP SECTION-->
 		<div class="page-header">
@@ -99,12 +105,12 @@
 							class="form-control" />
 						<form:input path="combo" id="combo-input"
 							placeholder="Type New Combo" class="form-control" />
-						<form:label path="overridenExplicitly">Overriden Explicitly: <form:checkbox
-								path="overridenExplicitly" id="overridenExplicitly-input"
-								placeholder="check overriden Explicitly" class="form-control" />
+						<form:label path="overridenExplicitly">Overriden Explicitly: 
+							<form:checkbox path="overridenExplicitly"
+								id="overridenExplicitly-input" class="form-control" />
 						</form:label>
-						<form:label path="hardcode">Hardcode: <form:checkbox
-								path="hardcode" id="hardcode-input" placeholder="check harcode"
+						<form:label path="hardcode">Hardcode: 
+							<form:checkbox path="hardcode" id="hardcode-input"
 								class="form-control" />
 						</form:label>
 						<form:input path="quantityRange1" id="quantityRange1-input"
@@ -123,14 +129,15 @@
 				</form:form>
 			</div>
 		</div>
-		
+
 		<!-- STANDARD RULE SETUP SECTION-->
 		<div class="page-header">
 			<h1>Add Standard Rules</h1>
 		</div>
 		<div class="row">
 			<div class="col-md-6">
-				<form:form method="POST" action="addStandardRule" commandName="demoForm">
+				<form:form method="POST" action="addStandardRule"
+					commandName="demoForm">
 					<div class="input-group">
 						<form:input path="ruleNumber" id="ruleNumber-input"
 							placeholder="Type rule number" class="form-control" />
@@ -162,7 +169,7 @@
 				</form:form>
 			</div>
 		</div>
-		
+
 		<!-- ORDER SETUP SECTION-->
 		<div class="page-header">
 			<h1>Add Order Lines</h1>
@@ -175,7 +182,7 @@
 							placeholder="Type order line number" class="form-control" />
 						<form:input path="accountNumber" id="accountNumber-input"
 							placeholder="Type account" class="form-control" />
-						<form:input path="accountType" id="accountType-input" 
+						<form:input path="accountType" id="accountType-input"
 							placeholder="Type account type" class="form-control" />
 						<form:input path="fc" id="fc-input" type="text"
 							placeholder="Type FC" class="form-control" />
@@ -201,7 +208,8 @@
 					Set</a></li>
 			<li><a href="#orderLine" role="tab" data-toggle="tab">Order
 					Lines</a></li>
-			<li><a href="#standardRule" role="tab" data-toggle="tab">Standard Rule</a></li>
+			<li><a href="#standardRule" role="tab" data-toggle="tab">Standard
+					Rule</a></li>
 		</ul>
 
 		<!-- Tab panes -->
@@ -261,7 +269,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="tab-pane" id="standardRule">
 				<div class="row">
 					<div class="col-md-12">
@@ -298,7 +306,7 @@
 										<td>${standardSprinkler.standardRule.discountRange3}</td>
 									</tr>
 								</c:forEach>
-							</tbody> 
+							</tbody>
 						</table>
 					</div>
 				</div>
@@ -317,23 +325,23 @@
 									<th>DGP</th>
 									<th>Isbn</th>
 									<th>Quantity</th>
-									<th>
-										<form:form method="POST" action="generateOffer"
+									<th><form:form method="POST" action="generateOffer"
 											commandName="demoForm">
 											<div class="input-group">
 												<span class="input-group-btn"> <input
-													class="btn btn-success" type="submit" value="Generate Offer" />
+													class="btn btn-success" type="submit"
+													value="Generate Offer" />
 												</span>
 											</div>
-										</form:form>
-									</th>
+										</form:form></th>
 								</tr>
 							</thead>
 							<tbody>
 								<c:forEach var="orderSprinkler" varStatus="item"
 									items="${orderSprinklers}">
 									<tr>
-										<form:form method="POST" action="deleteOrder" commandName="demoForm">
+										<form:form method="POST" action="deleteOrder"
+											commandName="demoForm">
 											<td>${orderSprinkler.orderLine.orderLineId}</td>
 											<td>${orderSprinkler.orderLine.account.accountNumber}</td>
 											<td>${orderSprinkler.orderLine.account.accountType}</td>
@@ -341,7 +349,8 @@
 											<td>${orderSprinkler.orderLine.product.productGroupCode}</td>
 											<td>${orderSprinkler.orderLine.product.isbn}</td>
 											<td>${orderSprinkler.orderLine.quantity}</td>
-											<td><span class="input-group-btn"> <input class="btn btn-success" type="submit" value="Delete Order" />
+											<td><span class="input-group-btn"> <input
+													class="btn btn-success" type="submit" value="Delete Order" />
 											</span></td>
 										</form:form>
 									</tr>

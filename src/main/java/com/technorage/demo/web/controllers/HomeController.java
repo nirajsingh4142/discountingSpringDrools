@@ -33,4 +33,7 @@ public interface HomeController {
     @RequestMapping(value="/deleteRuleSet", method=RequestMethod.POST)
     public String deleteRuleSet(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
     
+    @RequestMapping(value="/exportRuleData", method=RequestMethod.POST)
+    public String exportRuleData(@ModelAttribute DemoForm demoForm,Locale locale, Model model);
+    
 }

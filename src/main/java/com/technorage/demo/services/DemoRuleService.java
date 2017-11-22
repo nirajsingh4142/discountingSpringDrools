@@ -16,7 +16,7 @@ public interface DemoRuleService<T> {
 	Collection<RuleSetup> generateOffer(DemoForm demoForm);
 	Collection<StandardRuleSetup> getStandardRulesQualified(DemoForm demoForm);
 	Collection<Sprinkler> checkSprinklers();
-	Collection<OrderSprinkler> checkOrderLines();
+	Collection<OrderSprinkler> getOrderLines();
 	Collection<StandardSprinkler> checkStandardSprinklers();
 
 	void addRule(DemoForm demoForm);
